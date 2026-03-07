@@ -1,8 +1,8 @@
 ---
-title: "CrossTx Workflow Vignette"
+title: "MurineMatchTx Workflow Vignette"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{CrossTx Workflow Vignette}
+  %\VignetteIndexEntry{MurineMatchTx Workflow Vignette}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -12,18 +12,18 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-library(CrossTx)
+library(MurineMatchTx)
 ```
 
 # Introduction
 
-The **CrossTx** R package provides a cross-species transcriptomic similarity analysis workflow for mouse and human cancer models. This vignette demonstrates the complete analysis using the built-in example dataset `CrossTx_example_data`, avoiding any file-based dependencies.
+The **MurineMatchTx** R package provides a cross-species transcriptomic similarity analysis workflow for mouse and human cancer models. This vignette demonstrates the complete analysis using the built-in example dataset `MurineMatchTx_example_data`, avoiding any file-based dependencies.
 
 # Load Example Data
 
 ```{r}
-data(CrossTx_example_data)
-str(CrossTx_example_data, max.level = 2)
+data(MurineMatchTx_example_data)
+str(MurineMatchTx_example_data, max.level = 2)
 ```
 
 # DEG Volcano Plot
