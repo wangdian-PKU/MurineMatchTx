@@ -64,10 +64,10 @@ GO_enrichment_analysis <- function(deg_file,
   # Check if the "species" parameter is valid
   species_list <- c("hsa", "mmu", "rno")
   if (!species %in% species_list) {
-    stop("Error: "species" must be one of 'hsa', 'mmu', or 'rno'.")
+    stop("Error: `species` must be one of 'hsa', 'mmu', or 'rno'.")
   }
 
-  # Check if the "ont" parameter is valid
+  # Check if the `ont` parameter is valid
   if (!ont %in% c("BP", "MF", "CC")) {
     stop("Error: "ont" must be one of 'BP', 'MF', or 'CC'.")
   }
