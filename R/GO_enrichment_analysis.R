@@ -67,10 +67,6 @@ GO_enrichment_analysis <- function(deg_file,
     stop("Error: `species` must be one of 'hsa', 'mmu', or 'rno'.")
   }
 
-  # Check if the `ont` parameter is valid
-  if (!ont %in% c("BP", "MF", "CC")) {
-    stop("Error: `ont` must be one of 'BP', 'MF', or 'CC'.")
-  }
 
   # Automatically detect file format and read data
   file_ext <- tolower(file_ext(deg_file)) # Extract file extension
