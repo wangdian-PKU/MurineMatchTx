@@ -5,6 +5,7 @@
 *.tar.gz
 check-results/
 docs/
+inst/extdata/example_data.rar
 inst/doc
 /doc/
 /Meta/

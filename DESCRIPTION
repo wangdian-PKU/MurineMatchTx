@@ -19,8 +19,6 @@ Description: MurineMatchTx is a comprehensive R package designed for cross-speci
   best mimic human disease transcriptional profiles, facilitating rational
   model selection in translational research.
 License: GPL-3
-LazyData: True
-LazyDataCompression: xz
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
@@ -51,6 +49,8 @@ Imports:
 Depends: 
     R (>= 3.5)
 Suggests: 
+    testthat,
     knitr,
     rmarkdown
+Config/testthat/edition: 3
 VignetteBuilder: knitr
