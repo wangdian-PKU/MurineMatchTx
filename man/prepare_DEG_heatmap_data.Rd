@@ -4,12 +4,23 @@
 \alias{prepare_DEG_heatmap_data}
 \title{Prepare DEG Data for Heatmap Visualization}
 \usage{
-prepare_DEG_heatmap_data(tcga_file, mouse_files, inTax = 9606, outTax = 10090)
+prepare_DEG_heatmap_data(
+  tcga_file,
+  mouse_files,
+  logFC = 1,
+  FDR = 0.05,
+  inTax = 9606,
+  outTax = 10090
+)
 }
 \arguments{
 \item{tcga_file}{Character. Path to the TCGA DEG file.}
 
 \item{mouse_files}{Named list of file paths for mouse model DEG files.}
+
+\item{logFC}{Numeric. Absolute logFC threshold used to filter significant TCGA genes. Default is 1.}
+
+\item{FDR}{Numeric. FDR threshold used to filter significant TCGA genes. Default is 0.05.}
 
 \item{inTax}{Numeric. Input taxonomy ID (default: 9606 for human).}
 
@@ -18,9 +29,9 @@ prepare_DEG_heatmap_data(tcga_file, mouse_files, inTax = 9606, outTax = 10090)
 \value{
 A list containing:
 \itemize{
-\item \code{processed_tcga}: Processed TCGA DEG matrix.
-\item \code{processed_mouse}: Named list of processed mouse DEG matrices.
-\item \code{tcga_gene_list}: List of homologous genes used in processing.
+\item 'processed_tcga': Processed TCGA DEG matrix.
+\item 'processed_mouse': Named list of processed mouse DEG matrices.
+\item 'tcga_gene_list': List of homologous genes used in processing.
 }
 }
 \description{
@@ -31,13 +42,13 @@ and standardizes logFC values for visualization in a heatmap.
 This function preprocesses TCGA and mouse model DEG data by filtering significant genes,
 performing homologene conversion, and formatting logFC values.
 \itemize{
-\item Filters genes with \code{logFC > 1} and \code{FDR < 0.05} in TCGA.
+\item Filters TCGA genes using user-configurable 'logFC' and 'FDR' thresholds.
 \item Performs homologene conversion to retain only mouse-human homologous genes.
 \item Formats logFC values:
 \itemize{
-\item \code{1} for TCGA high-expression genes.
-\item \code{-1} for TCGA low-expression genes.
-\item \code{NA} for non-significant genes.
+\item '1' for TCGA high-expression genes.
+\item '-1' for TCGA low-expression genes.
+\item 'NA' for non-significant genes.
 }
 }
 }
@@ -51,7 +62,7 @@ mouse_files <- list(
 )
 
 # Run data processing
-processed_data <- prepare_DEG_heatmap_data(tcga_path, mouse_files)
+processed_data <- prepare_DEG_heatmap_data(tcga_path, mouse_files, logFC = 0.5, FDR = 0.1)
 
 # View processed TCGA data
 head(processed_data$processed_tcga)

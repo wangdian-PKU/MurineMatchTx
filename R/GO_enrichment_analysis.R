@@ -1,3 +1,13 @@
+.get_symbol_map <- function(species) {
+  if (species == "hsa") {
+    return(toTable(get("org.Hs.egSYMBOL", envir = asNamespace("org.Hs.eg.db"))))
+  }
+  if (species == "mmu") {
+    return(toTable(get("org.Mm.egSYMBOL", envir = asNamespace("org.Mm.eg.db"))))
+  }
+  toTable(get("org.Rn.egSYMBOL", envir = asNamespace("org.Rn.eg.db")))
+}
+
 #' Gene Ontology (GO) Enrichment Analysis
 #'
 #' This function performs GO enrichment analysis (BP, MF, CC)
@@ -67,6 +77,10 @@ GO_enrichment_analysis <- function(deg_file,
     stop("Error: `species` must be one of 'hsa', 'mmu', or 'rno'.")
   }
 
+  # Check if the "ont" parameter is valid
+  if (!ont %in% c("BP", "MF", "CC")) {
+    stop("Error: `ont` must be one of 'BP', 'MF', or 'CC'.")
+  }
 
   # Automatically detect file format and read data
   file_ext <- tolower(file_ext(deg_file)) # Extract file extension
@@ -90,13 +104,7 @@ GO_enrichment_analysis <- function(deg_file,
   }
 
   # Load species-specific gene ID mapping
-  if (species == "hsa") {
-    EG2Symbol <- toTable(org.Hs.egSYMBOL)
-  } else if (species == "mmu") {
-    EG2Symbol <- toTable(org.Mm.egSYMBOL)
-  } else {
-    EG2Symbol <- toTable(org.Rn.egSYMBOL)
-  }
+  EG2Symbol <- .get_symbol_map(species)
 
   # Filter significant DEGs (logFC > 1 & FDR < 0.05)
   geneLists <- deg_data %>%
@@ -120,7 +128,7 @@ GO_enrichment_analysis <- function(deg_file,
   go_terms <- go_terms[grepl("^GO:\\d{7}$", go_terms)]
 
   if (length(go_terms) < 2) {
-    stop("Error: The number of effective GO terms is too small (< 2) to conduct go similarity analysis. 
+    stop("Error: The number of effective GO terms is too small (< 2) to conduct go similarity analysis.
          Please check whether the input differential expression matrix is too small or the annotation fails.")
   }
 

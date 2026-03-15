@@ -13,10 +13,10 @@ plot_DEG_barplot(
 )
 }
 \arguments{
-\item{heatmap_data}{Matrix. The \code{merge_edger} output from \code{plot_DEG_heatmap()}.}
+\item{heatmap_data}{Matrix. The 'merge_edger' output from 'plot_DEG_heatmap()'.}
 
-\item{colors}{Named list. Colors for upregulated (\code{"up"}) and downregulated (\code{"down"}) genes.
-Default: \code{list(up = "#ff7676", down = "#66d4ff")}.}
+\item{colors}{Named list. Colors for upregulated ('up') and downregulated ('down') genes.
+Default: list(up = "#ff7676", down = "#66d4ff").}
 
 \item{width}{Integer. The width of ggplot_draw (default: 8).}
 
@@ -25,25 +25,25 @@ Default: \code{list(up = "#ff7676", down = "#66d4ff")}.}
 \item{output_path}{Character. File path for saving the plot (default: "./DEG/").}
 }
 \value{
-A \code{ggplot} object representing the barplot visualization.
+A 'ggplot' object representing the barplot visualization.
 }
 \description{
-This function visualizes the \strong{distribution of DEGs} in different mouse
+This function visualizes the distribution of DEGs in different mouse
 HCC models relative to TCGA-based gene expression categories.
 }
 \details{
-This function creates a \strong{barplot} comparing the number of upregulated and
+This function creates a barplot comparing the number of upregulated and
 downregulated genes across multiple mouse HCC models.
 \itemize{
-\item \strong{Input Data:} The function requires \code{merge_edger} from \code{plot_DEG_heatmap()}.
-\item \strong{Barplot Groups:}
+\item Input Data: The function requires 'merge_edger' from 'plot_DEG_heatmap()'.
+\item Barplot Groups:
 \itemize{
-\item \strong{X-axis:} Mouse model datasets (contrast).
-\item \strong{Y-axis:} Number of genes.
-\item \strong{Colors:}
+\item X-axis: Mouse model datasets (contrast).
+\item Y-axis: Number of genes.
+\item Colors:
 \itemize{
-\item \strong{Red (\code{up})}: Genes following TCGA high-expression pattern.
-\item \strong{Blue (\code{down})}: Genes following TCGA low-expression pattern.
+\item Red ('up'): Genes following TCGA high-expression pattern.
+\item Blue ('down'): Genes following TCGA low-expression pattern.
 }
 }
 }

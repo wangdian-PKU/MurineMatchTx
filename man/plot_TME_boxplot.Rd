@@ -14,17 +14,17 @@ plot_TME_boxplot(
 )
 }
 \arguments{
-\item{eset_tpm}{Data frame. TPM-transformed RNA-seq expression matrix, output from \code{plot_TME_barplot()}.}
+\item{eset_tpm}{Data frame. TPM-transformed RNA-seq expression matrix, output from 'plot_TME_barplot()'.}
 
-\item{group_as}{Character vector. \code{Identical} with the \code{group_as} in \code{plot_TME_barplot()}.}
+\item{group_as}{Character vector. 'Identical' with the 'group_as' in 'plot_TME_barplot()'.}
 
-\item{condition_list}{Named list. Sample count for each mouse model (e.g., \code{list("DEN" = 6, "GSExxx" = 8)}).}
+\item{condition_list}{Named list. Sample count for each mouse model (e.g., 'list("DEN" = 6, "GSExxx" = 8)').}
 
 \item{width}{Integer. Width of saved plots (default: 10).}
 
 \item{height}{Integer. Height of saved plots (default: 6).}
 
-\item{output_path}{Character. Directory path to save boxplots (default: \code{"./TME_boxplots"}).}
+\item{output_path}{Character. Directory path to save boxplots (default: "./TME_boxplots").}
 }
 \value{
 Saves multiple boxplots and returns a list of ggplot objects.

@@ -15,19 +15,19 @@ compute_similarity_matrix(
 )
 }
 \arguments{
-\item{expression_matrix}{The Batch-corrected expression data with genes as row names from \code{prepare_PCA_data()}.}
+\item{expression_matrix}{The Batch-corrected expression data with genes as row names from 'prepare_PCA_data()'.}
 
-\item{group_all}{The group information of TCGA and all mouse models from \code{prepare_PCA_data()}.}
+\item{group_all}{The group information of TCGA and all mouse models from 'prepare_PCA_data()'.}
 
-\item{tcga_sample_size}{Integer. \strong{Number of TCGA samples} in the dataset.}
+\item{tcga_sample_size}{Integer. Number of TCGA samples in the dataset.}
 
-\item{tcga_normal_count}{Integer. \strong{Number of TCGA normal samples}.}
+\item{tcga_normal_count}{Integer. Number of TCGA normal samples.}
 
-\item{merge_clinic_CNV}{Data frame. Processed TCGA \strong{clinical + CNV} data from \code{prepare_similarity_data()}.}
+\item{merge_clinic_CNV}{Data frame. Processed TCGA clinical + CNV data from 'prepare_similarity_data()'.}
 
-\item{cnv_genes}{Character vector. Gene names for CNV annotations (e.g., \code{c("TP53", "PTEN")}).}
+\item{cnv_genes}{Character vector. Gene names for CNV annotations (e.g., c("TP53", "PTEN")).}
 
-\item{clinical_vars}{Character vector. \strong{User-defined clinical variables} to extract (e.g., \code{c("Hepatitis B", "Non-Alcoholic")}).}
+\item{clinical_vars}{Character vector. User-defined clinical variables to extract (e.g., c("Hepatitis B", "Non-Alcoholic")).}
 }
 \value{
 A list containing:
@@ -38,15 +38,15 @@ A list containing:
 }
 \description{
 \itemize{
-\item \strong{Formats} the input expression matrix by setting gene IDs as the first column.
-\item Extracts \strong{TCGA and mouse model expression data} from a preprocessed matrix.
-\item Computes a \strong{similarity matrix} using \code{ws.trom()}, comparing TCGA with mouse models.
-\item Filters similarity data \strong{to retain only relevant comparisons} (tumor vs. tumor, normal vs. normal).
-\item \strong{Incorporates TCGA clinical data} by merging with \code{merge_clinic_CNV}.
+\item Formats the input expression matrix by setting gene IDs as the first column.
+\item Extracts TCGA and mouse model expression data from a preprocessed matrix.
+\item Computes a similarity matrix using 'ws.trom()', comparing TCGA with mouse models.
+\item Filters similarity data to retain only relevant comparisons (tumor vs. tumor, normal vs. normal).
+\item Incorporates TCGA clinical data by merging with 'merge_clinic_CNV'.
 }
 }
 \details{
-This function calculates a \strong{transcriptional similarity matrix} between \strong{TCGA samples} and \strong{mouse models}.
+This function calculates a transcriptional similarity matrix between TCGA samples and mouse models.
 }
 \examples{
 \dontrun{

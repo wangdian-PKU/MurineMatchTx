@@ -16,13 +16,13 @@ GO_enrichment_analysis(
 )
 }
 \arguments{
-\item{deg_file}{Character. Path to the edgeR DEG results file (\code{.tsv} or \code{.csv}).}
+\item{deg_file}{Character. Path to the edgeR DEG results file (.tsv or .csv).}
 
-\item{species}{Character. One of \code{hsa}, \code{mmu}, or \code{rno}.}
+\item{species}{Character. One of hsa, mmu, or rno.}
 
-\item{org_db}{Character. The corresponding \code{OrgDb} annotation database (e.g., \code{"org.Hs.eg.db"}).}
+\item{org_db}{Character. The corresponding \code{OrgDb} annotation database (e.g., "org.Hs.eg.db").}
 
-\item{ont}{Character. Ontology type for GO enrichment (\code{"BP"}, \code{"MF"}, \code{"CC"}). Default is \code{"BP"}.}
+\item{ont}{Character. Ontology type for GO enrichment ("BP", "MF", "CC"). Default is "BP".}
 
 \item{column_title}{Character. The title used for GO similarity visualization.}
 
@@ -30,34 +30,34 @@ GO_enrichment_analysis(
 
 \item{height}{Integer. The height of PDF (default: 6.35).}
 
-\item{output_path}{Character. Directory to save the PDF file (default: \code{"./enrichment"}).}
+\item{output_path}{Character. Directory to save the PDF file (default: "./enrichment").}
 }
 \value{
-Saves the GO enrichment analysis plot as a \code{.pdf} file.
+Saves the GO enrichment analysis plot as a .pdf file.
 }
 \description{
 \itemize{
-\item Extracts significant DEGs (\code{logFC > 1 & FDR < 0.05}).
-\item Reads input data automatically from \code{.tsv} or \code{.csv} files.
-\item Converts gene IDs based on the selected species (\code{hsa}, \code{mmu}, \code{rno}).
-\item Supports user-defined ontology (\code{BP}, \code{MF}, \code{CC}).
-\item Performs GO enrichment analysis and \strong{saves the plot to a PDF file}.
+\item Extracts significant DEGs (logFC > 1 & FDR < 0.05).
+\item Reads input data automatically from .tsv or .csv files.
+\item Converts gene IDs based on the selected species (hsa, mmu, rno).
+\item Supports user-defined ontology (BP, MF, CC).
+\item Performs GO enrichment analysis and saves the plot to a PDF file.
 }
 }
 \details{
 This function performs GO enrichment analysis (BP, MF, CC)
 for differentially expressed genes (DEGs) obtained from edgeR analysis.
 \itemize{
-\item \strong{Input Data:} The function requires an edgeR DEG results file.
-\item \strong{Supported File Formats:} \code{.tsv} (tab-separated) and \code{.csv} (comma-separated).
-\item \strong{Supported Species:} \code{hsa} (human), \code{mmu} (mouse), \code{rno} (rat).
-\item \strong{Ontology Options (\code{ont})}:
+\item Input Data: The function requires an edgeR DEG results file.
+\item Supported File Formats: .tsv (tab-separated) and .csv (comma-separated).
+\item Supported Species: hsa (human), mmu (mouse), rno (rat).
+\item Ontology Options (ont):
 \itemize{
-\item \code{"BP"}: Biological Process (default)
-\item \code{"MF"}: Molecular Function
-\item \code{"CC"}: Cellular Component
+\item "BP": Biological Process (default)
+\item "MF": Molecular Function
+\item "CC": Cellular Component
 }
-\item \strong{Visualization:} GO term similarity is visualized using \code{simplifyGO()}.
+\item Visualization: GO term similarity is visualized using simplifyGO().
 }
 }
 \examples{

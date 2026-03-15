@@ -22,33 +22,33 @@ plot_TROMscore_heatmap(
 )
 }
 \arguments{
-\item{dm_trom_del_backgroud_clinic}{Data frame. Output from \code{compute_similarity_matrix()}, containing \strong{TROM scores}.}
+\item{dm_trom_del_backgroud_clinic}{Data frame. Output from 'compute_similarity_matrix()', containing 'TROM scores'.}
 
-\item{trom_matrix}{Data frame. \strong{Raw ws.trom similarity matrix} before background removal.Output from \code{compute_similarity_matrix()}.}
+\item{trom_matrix}{Data frame. 'Raw ws.trom similarity matrix' before background removal.Output from 'compute_similarity_matrix()'.}
 
-\item{tcga_sample_size}{Integer. \strong{Total number of TCGA samples}.}
+\item{tcga_sample_size}{Integer. Total number of TCGA samples.}
 
-\item{tcga_normal_count}{Integer. \strong{Number of TCGA normal samples}.}
+\item{tcga_normal_count}{Integer. Number of TCGA normal samples.}
 
-\item{model_group_count}{Integer. \strong{Total number of Mouse model samples}.}
+\item{model_group_count}{Integer. Total number of Mouse model samples.}
 
-\item{condition}{Named list. \strong{User-defined sample counts per mouse model condition} (e.g., \code{list("HBV pten p53 ko" = 5, "DEN Cl4" = 21)}).}
+\item{condition}{Named list. User-defined sample counts per mouse model condition (e.g., 'list("HBV pten p53 ko" = 5, "DEN Cl4" = 21)').}
 
-\item{clinical_vars}{Character vector. \strong{Clinical variables used in \code{prepare_dm_trom_del_backgroud_clinic()}}.}
+\item{clinical_vars}{Character vector. Clinical variables used in 'prepare_dm_trom_del_backgroud_clinic()'.}
 
-\item{cnv_genes}{Character vector. \strong{Copy number variation (CNV) genes used in \code{prepare_dm_trom_del_backgroud_clinic()}}.}
+\item{cnv_genes}{Character vector. Copy number variation (CNV) genes used in 'prepare_dm_trom_del_backgroud_clinic()'.}
 
-\item{group_all}{The group information of TCGA and all mouse models from \code{prepare_PCA_data()}.}
+\item{group_all}{The group information of TCGA and all mouse models from 'prepare_PCA_data()'.}
 
 \item{width}{Integer. The width of PDF (default: 11.84).}
 
 \item{height}{Integer. The height of PDF (default: 7.11).}
 
-\item{output_path}{Character. File path for saving the heatmap (default: \code{"./similarity/TROM_heatmap.pdf"}).}
+\item{output_path}{Character. File path for saving the heatmap (default: "./similarity/TROM_heatmap.pdf").}
 
-\item{cluster_rows}{Logical. Whether to cluster rows (default: \code{FALSE}).}
+\item{cluster_rows}{Logical. Whether to cluster rows (default: 'FALSE').}
 
-\item{cluster_cols}{Logical. Whether to cluster columns (default: \code{FALSE}).}
+\item{cluster_cols}{Logical. Whether to cluster columns (default: 'FALSE').}
 }
 \value{
 A list containing:
@@ -58,12 +58,12 @@ A list containing:
 }
 }
 \description{
-This function visualizes \strong{transcriptional similarity scores} between \strong{TCGA samples} and \strong{mouse models}.
+This function visualizes transcriptional similarity scores between TCGA samples and mouse models.
 }
 \details{
 \itemize{
-\item \strong{Returns \code{heatmap_obj} (heatmap plot) and \code{merge_long} (processed similarity scores)}.
-\item \code{merge_long} is used as the input for \code{plot_TROMscore_boxplot()}.
+\item Returns 'heatmap_obj' (heatmap plot) and 'merge_long' (processed similarity scores).
+\item 'merge_long' is used as the input for 'plot_TROMscore_boxplot()'.
 }
 }
 \examples{

@@ -8,7 +8,7 @@
 #' and standardizes logFC values for visualization in a heatmap.
 #'
 #' @details
-#' - Filters genes with 'logFC > 1' and 'FDR < 0.05' in TCGA.
+#' - Filters TCGA genes using user-configurable 'logFC' and 'FDR' thresholds.
 #' - Performs homologene conversion to retain only mouse-human homologous genes.
 #' - Formats logFC values:
 #'   - '1' for TCGA high-expression genes.
@@ -20,6 +20,8 @@
 #'
 #' @param tcga_file Character. Path to the TCGA DEG file.
 #' @param mouse_files Named list of file paths for mouse model DEG files.
+#' @param logFC Numeric. Absolute logFC threshold used to filter significant TCGA genes. Default is 1.
+#' @param FDR Numeric. FDR threshold used to filter significant TCGA genes. Default is 0.05.
 #' @param inTax Numeric. Input taxonomy ID (default: 9606 for human).
 #' @param outTax Numeric. Output taxonomy ID (default: 10090 for mouse).
 #'
@@ -38,7 +40,7 @@
 #' )
 #'
 #' # Run data processing
-#' processed_data <- prepare_DEG_heatmap_data(tcga_path, mouse_files)
+#' processed_data <- prepare_DEG_heatmap_data(tcga_path, mouse_files, logFC = 0.5, FDR = 0.1)
 #'
 #' # View processed TCGA data
 #' head(processed_data$processed_tcga)
@@ -48,12 +50,19 @@
 #' }
 #'
 #' @export
-prepare_DEG_heatmap_data <- function(tcga_file, mouse_files, inTax = 9606, outTax = 10090) {
+prepare_DEG_heatmap_data <- function(tcga_file, mouse_files, logFC = 1, FDR = 0.05, inTax = 9606, outTax = 10090) {
+  if (!is.numeric(logFC) || length(logFC) != 1 || is.na(logFC) || logFC < 0) {
+    stop("Error: 'logFC' must be a single non-negative number.")
+  }
+
+  if (!is.numeric(FDR) || length(FDR) != 1 || is.na(FDR) || FDR < 0 || FDR > 1) {
+    stop("Error: 'FDR' must be a single number between 0 and 1.")
+  }
+
   # Read TCGA DEG data
   tcga_data <- read.table(tcga_file, header = TRUE, sep = "\t", row.names = 1)[, c(1, 4)]
-  # Filter genes with logFC > 1 & FDR < 0.05
-  tcga_filtered <- tcga_data %>%
-    filter(abs(logFC) >= 1 & FDR < 0.05) %>%
+  # Filter genes using user-configurable TCGA thresholds
+  tcga_filtered <- tcga_data[abs(tcga_data$logFC) >= logFC & tcga_data$FDR < FDR, , drop = FALSE] %>%
     arrange(desc(logFC))
   # Get homologous genes
   homolog_genes <- homologene(rownames(tcga_filtered), inTax = inTax, outTax = outTax)[, c(1:2)]

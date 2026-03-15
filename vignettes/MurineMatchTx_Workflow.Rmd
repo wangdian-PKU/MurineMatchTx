@@ -17,14 +17,11 @@ library(MurineMatchTx)
 
 # Introduction
 
-The **MurineMatchTx** R package provides a cross-species transcriptomic similarity analysis workflow for mouse and human cancer models. This vignette demonstrates the complete analysis using the built-in example dataset `MurineMatchTx_example_data`, avoiding any file-based dependencies.
+The **MurineMatchTx** R package provides a cross-species transcriptomic similarity analysis workflow for mouse and human cancer models. Example input files are distributed separately as the archive `example_data.rar` and can be downloaded from the GitHub Release page for this repository.
 
-# Load Example Data
+# Example Data
 
-```{r}
-data(MurineMatchTx_example_data)
-str(MurineMatchTx_example_data, max.level = 2)
-```
+Download `example_data.rar` from `https://github.com/wangdian-PKU/MurineMatchTx/releases/download/example-data/example_data.rar`, extract it locally, and use the resulting files as inputs to the functions shown below.
 
 # DEG Volcano Plot
 

@@ -15,32 +15,32 @@ plot_TME_barplot(
 )
 }
 \arguments{
-\item{data_matrix}{Data frame. \code{Raw} count matrix or \code{TPM} data (genes × samples).}
+\item{data_matrix}{Data frame. 'Raw' count matrix or 'TPM' data (genes × samples).}
 
-\item{input_type}{Character. \code{"count"} (convert count to TPM) or \code{"TPM"} (use TPM directly). Default is \code{"count"}.}
+\item{input_type}{Character. "count" (convert count to TPM) or "TPM" (use TPM directly). Default is "count".}
 
-\item{method}{Character. The immune infiltration method (\code{"cibersort"}, \code{"mcpcounter"}, \code{"xcell"}, \code{"quantiseq"}).}
+\item{method}{Character. The immune infiltration method ("cibersort", "mcpcounter", "xcell", "quantiseq").}
 
 \item{group_as}{Character vector. Clarify the specific names of different treatment groups and the respective numbers of normal and cancer groups in each of them.}
 
-\item{output_path}{Character. Directory to save the plot (default: \code{"./TME"}).}
+\item{output_path}{Character. Directory to save the plot (default: "./TME").}
 
-\item{height}{Numeric. Height of the output PDF (default: \code{5.2}).}
+\item{height}{Numeric. Height of the output PDF (default: 5.2).}
 
-\item{width}{Numeric. Width of the output PDF (default: \code{10}).}
+\item{width}{Numeric. Width of the output PDF (default: 10).}
 }
 \value{
 A list containing:
 \itemize{
-\item \strong{\code{eset_tpm}}: The TPM-transformed expression matrix.
-\item \strong{\code{method_model}}: Immune infiltration results.
-\item \strong{A stacked barplot PDF file}: Saved at \code{output_path}, showing immune cell fractions per group.
+\item eset_tpm: The TPM-transformed expression matrix.
+\item method_model: Immune infiltration results.
+\item A stacked barplot PDF file: Saved at 'output_path', showing immune cell fractions per group.
 }
 }
 \description{
 \itemize{
-\item Converts count matrix to TPM using \code{IOBR::count2tpm()}, or allows direct TPM input.
-\item Supports multiple deconvolution methods: \code{"cibersort"}, \code{"mcpcounter"}, \code{"xcell"}, \code{"quantiseq"}.
+\item Converts count matrix to TPM using 'IOBR::count2tpm()', or allows direct TPM input.
+\item Supports multiple deconvolution methods: "cibersort", "mcpcounter", "xcell", "quantiseq".
 \item Generates a stacked barplot to visualize immune infiltration across sample groups.
 }
 }
@@ -48,9 +48,9 @@ A list containing:
 This function performs immune infiltration analysis using various deconvolution methods
 and visualizes the immune cell composition in a stacked barplot.
 \itemize{
-\item \strong{Input Data:} Users can provide either a raw count matrix (\code{input_type = "count"}) or TPM data (\code{input_type = "TPM"}).
-\item \strong{Group Definition:} Users must provide a valid \code{group_as} vector matching the sample order.
-\item \strong{Visualization:} Saves a PDF file showing the fraction of immune cell types across groups.
+\item Input Data: Users can provide either a raw count matrix (input_type = "count") or TPM data (input_type = "TPM").
+\item Group Definition: Users must provide a valid 'group_as' vector matching the sample order.
+\item Visualization: Saves a PDF file showing the fraction of immune cell types across groups.
 }
 }
 \examples{
