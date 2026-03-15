@@ -17,10 +17,10 @@ prepare_PCA_data(
 \item{mouse_files}{Named list of file paths for mouse model expression data.}
 
 \item{sample_counts}{Named list specifying the number of normal and tumor samples for each dataset.
-Each dataset must have a \code{normal} and \code{tumor} entry, e.g.,
-\code{list("TCGA" = c(normal = 50, tumor = 374), "Our_Model" = c(normal = 3, tumor = 2))}}
+Each dataset must have a 'normal' and 'tumor' entry, e.g.,
+'list("TCGA" = c(normal = 50, tumor = 374), "Our_Model" = c(normal = 3, tumor = 2))'}
 
-\item{batch_correction}{Logical. Whether to apply batch correction (default: \code{TRUE}).}
+\item{batch_correction}{Logical. Whether to apply batch correction (default: 'TRUE').}
 }
 \value{
 A list containing:
@@ -28,23 +28,23 @@ A list containing:
 \item{merged_data}{Merged expression matrix (genes × samples).}
 \item{group_all}{Sample group labels (normal/tumor for each dataset).}
 \item{batch}{Batch assignment for each sample (dataset source).}
-\item{corrected_data}{Batch-corrected expression matrix (if \code{batch_correction = TRUE}).}
+\item{corrected_data}{Batch-corrected expression matrix (if 'batch_correction = TRUE').}
 }
 }
 \description{
 \itemize{
-\item Reads expression data from \strong{TCGA} and \strong{multiple mouse cancer models}.
+\item Reads expression data from TCGA and multiple mouse cancer models.
 \item Ensures gene expression data are standardized and merged based on homologous genes.
-\item Allows optional \strong{batch correction} using \code{ComBat}.
+\item Allows optional batch correction using 'ComBat'.
 }
 }
 \details{
 This function processes gene expression data from TCGA and multiple mouse models
 to generate a merged expression matrix suitable for PCA analysis.
 \itemize{
-\item Uses \strong{gene names as row identifiers} to merge datasets.
-\item \strong{Sample grouping} (\code{group_all}) and \strong{batch effects} (\code{batch}) are dynamically assigned.
-\item If \code{batch_correction = TRUE}, batch correction is applied using \code{ComBat}.
+\item Uses gene names as row identifiers to merge datasets.
+\item Sample grouping ('group_all') and batch effects ('batch') are dynamically assigned.
+\item If 'batch_correction = TRUE', batch correction is applied using 'ComBat'.
 }
 }
 \examples{

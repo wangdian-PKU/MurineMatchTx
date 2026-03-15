@@ -51,7 +51,10 @@
 #' }
 #'
 #' @export
-prepare_PCA_data <- function(tcga_file, mouse_files, sample_counts, batch_correction = TRUE) {
+prepare_PCA_data <- function(tcga_file,
+                             mouse_files,
+                             sample_counts,
+                             batch_correction = TRUE) {
   # Helper function to auto-detect file type
   read_expression_file <- function(file) {
     ext <- tolower(tools::file_ext(file))

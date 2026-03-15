@@ -2,19 +2,19 @@
 % Please edit documentation in R/plot_PCA_tinyarray.R
 \name{plot_PCA_tinyarray}
 \alias{plot_PCA_tinyarray}
-\title{PCA Plot Using \code{tinyarray::draw_pca()}}
+\title{PCA Plot Using 'tinyarray::draw_pca()'}
 \usage{
 plot_PCA_tinyarray(pca_data, batch_correction = TRUE, colors = NULL)
 }
 \arguments{
-\item{pca_data}{List. Output from \code{prepare_PCA_data()}, containing merged expression data.}
+\item{pca_data}{List. Output from 'prepare_PCA_data()', containing merged expression data.}
 
-\item{batch_correction}{Logical. Whether to use batch-corrected data (default: \code{TRUE}).}
+\item{batch_correction}{Logical. Whether to use batch-corrected data (default: 'TRUE').}
 
 \item{colors}{Character vector. Colors for different groups.}
 }
 \description{
-This function performs PCA analysis and visualizes the results using \code{tinyarray::draw_pca()}.
+This function performs PCA analysis and visualizes the results using 'tinyarray::draw_pca()'.
 }
 \examples{
 \dontrun{
