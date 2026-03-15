@@ -11,20 +11,20 @@ plot_TROMscore_boxplot(
 )
 }
 \arguments{
-\item{merge_long}{Data frame. Output from \code{plot_TROMscore_heatmap()}, containing \strong{TROM scores}.}
+\item{merge_long}{Data frame. Output from 'plot_TROMscore_heatmap()', containing 'TROM scores'.}
 
-\item{output_path}{Character. File path to save the figure (default: \code{"./similarity/TROM_boxplot"}).}
+\item{output_path}{Character. File path to save the figure (default: "./similarity/TROM_boxplot").}
 
-\item{combine_plots}{Logical. Whether to \strong{combine tileplot & boxplot} into one figure (default: \code{TRUE}).}
+\item{combine_plots}{Logical. Whether to combine tileplot & boxplot into one figure (default: 'TRUE').}
 }
 \value{
 Saves the plot(s) and returns the ggplot object.
 }
 \description{
-This function generates \strong{two subplots}:
+This function generates two subplots:
 \enumerate{
-\item \strong{Boxplot} of transcriptional similarity scores (\verb{TROM score}).
-\item \strong{Tileplot} showing the \strong{mean similarity scores per condition}.
+\item Boxplot of transcriptional similarity scores ('TROM score').
+\item Tileplot showing the mean similarity scores per condition.
 }
 }
 \examples{

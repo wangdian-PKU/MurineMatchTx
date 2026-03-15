@@ -12,9 +12,9 @@ merge_DEG_datasets(
 )
 }
 \arguments{
-\item{human_file_path}{Character. Path to the TCGA human cancer DEG \code{.tsv} or \code{.csv} file.}
+\item{human_file_path}{Character. Path to the TCGA human cancer DEG .tsv or .csv file.}
 
-\item{mouse_files}{Named list of file paths to mouse cancer model DEG \code{.tsv} or \code{.csv} files.
+\item{mouse_files}{Named list of file paths to mouse cancer model DEG .tsv or .csv files.
 Each element should be named according to the dataset source.}
 
 \item{logFC_value}{Numeric. Threshold for log2 fold change (default: 1).}
@@ -46,10 +46,10 @@ This function loads multiple DEG datasets (both human and mouse models),
 merges them into a single standardized format, and annotates each dataset
 with a group label for comparison.
 \itemize{
-\item \strong{Supported file formats:} \code{.tsv} (tab-separated) and \code{.csv} (comma-separated).
-\item \strong{Required columns:} \code{gene}, \code{logFC}, \code{FDR}.
+\item Supported file formats: .tsv (tab-separated) and .csv (comma-separated).
+\item Required columns: 'gene', 'logFC', 'FDR'.
 \item If a file format is not supported, an error message will be displayed.
-\item \strong{DEG threshold:} You can customize \code{logFC} and \code{FDR} thresholds (default: logFC > 1, FDR < 0.05).
+\item DEG threshold: You can customize 'logFC' and 'FDR' thresholds (default: logFC > 1, FDR < 0.05).
 }
 }
 \examples{

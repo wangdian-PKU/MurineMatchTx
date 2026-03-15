@@ -20,8 +20,8 @@ plot_DEG_volcano(
 )
 }
 \arguments{
-\item{deg_data}{Data frame containing DEG results. Output result from \code{merge_DEG_datasets()}
-Must include columns: \code{logFC}, \code{FDR}, \code{contrast}, \code{gene}, \code{change}.}
+\item{deg_data}{Data frame containing DEG results. Output result from 'merge_DEG_datasets()'
+Must include columns: 'logFC', 'FDR', 'contrast', 'gene', 'change'.}
 
 \item{title}{Character. Title of the volcano plot (default: "Volcano Plot of DEG Analysis").}
 
@@ -29,8 +29,8 @@ Must include columns: \code{logFC}, \code{FDR}, \code{contrast}, \code{gene}, \c
 
 \item{ylab}{Character. Label for the y-axis (default: "Log2 Fold Change").}
 
-\item{colors}{Named list with colors for upregulated (\code{"Up"}), downregulated (\code{"Down"}), and stable (\code{"Stable"}) genes.
-Default: \code{list(Up = "#e6550d", Down = "#3182bd", Stable = "#636363")}.}
+\item{colors}{Named list with colors for upregulated ("Up"), downregulated ("Down"), and stable ("Stable") genes.
+Default: list(Up = "#e6550d", Down = "#3182bd", Stable = "#636363").}
 
 \item{point_size}{Numeric. Size of points in the plot (default: 2).}
 
@@ -47,7 +47,7 @@ Default: \code{list(Up = "#e6550d", Down = "#3182bd", Stable = "#636363")}.}
 \item{output_path}{Character. File path for saving the plot (default: "./DEG/").}
 }
 \value{
-A \code{ggplot} object representing the volcano plot.
+A 'ggplot' object representing the volcano plot.
 \describe{
 \item{Visual Output}{A scatter plot with logFC on the y-axis and contrast groups on the x-axis.}
 \item{Customization}{Users can further modify the plot using \code{ggplot2} functions.}
@@ -55,14 +55,14 @@ A \code{ggplot} object representing the volcano plot.
 }
 }
 \description{
-This function generates a \strong{volcano plot} that displays the log2 fold change (logFC)
+This function generates a volcano plot that displays the log2 fold change (logFC)
 against the -log10 false discovery rate (FDR) of differentially expressed genes.
 }
 \details{
 Creates a volcano plot for visualizing differential gene expression (DEG) data.
 \itemize{
-\item Highlights significantly \strong{upregulated}, \strong{downregulated}, and \strong{stable} genes.
-\item Users can \strong{customize colors, axis labels, title, and save format}.
+\item Highlights significantly upregulated, downregulated, and stable genes.
+\item Users can customize colors, axis labels, title, and save format.
 }
 }
 \examples{

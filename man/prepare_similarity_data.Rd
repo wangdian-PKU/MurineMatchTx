@@ -17,35 +17,35 @@ prepare_similarity_data(
 
 \item{cnv_file}{Character. Path to the TCGA CNV data file.}
 
-\item{clinical_vars}{Character vector. \strong{User-defined clinical variables} to extract (e.g., \code{c("Hepatitis B", "Non-Alcoholic")}).}
+\item{clinical_vars}{Character vector. User-defined clinical variables to extract (e.g., 'c("Hepatitis B", "Non-Alcoholic")').}
 
-\item{cnv_genes}{Character vector. \strong{Genes to extract from CNV data} (e.g., \code{c("TP53", "PTEN")}).}
+\item{cnv_genes}{Character vector. Genes to extract from CNV data (e.g., c("TP53", "PTEN")).}
 
-\item{risk_factor_column}{Character. \strong{Column name in clinical data that contains risk factors} (e.g., \code{"HISTORY_HEPATO_CARCINOMA_RISK_FACTORS"}).}
+\item{risk_factor_column}{Character. Column name in clinical data that contains risk factors (e.g., "HISTORY_HEPATO_CARCINOMA_RISK_FACTORS").}
 }
 \value{
-A \strong{data frame} containing:
+A data frame containing:
 \itemize{
-\item \code{PATIENT_ID}: Unique patient identifier.
-\item \strong{Selected clinical variables} (e.g., HBV, Non-Alcoholic).
-\item \strong{Selected CNV gene alterations} (e.g., TP53, PTEN).
+\item PATIENT_ID: Unique patient identifier.
+\item Selected clinical variables (e.g., HBV, Non-Alcoholic).
+\item Selected CNV gene alterations (e.g., TP53, PTEN).
 }
 }
 \description{
 \itemize{
-\item Extracts \strong{user-specified clinical variables} (e.g., \code{Hepatitis}, \code{Non-Alcoholic}).
-\item Extracts \strong{CNV information} for user-defined genes (e.g., \code{TP53}, \code{PTEN}).
-\item Returns a \strong{merged dataset} containing \strong{patient ID, clinical data, and CNV mutations}.
+\item Extracts user-specified clinical variables (e.g., 'Hepatitis', 'Non-Alcoholic').
+\item Extracts CNV information for user-defined genes (e.g., 'TP53', 'PTEN').
+\item Returns a merged dataset containing patient ID, clinical data, and CNV mutations.
 }
 }
 \details{
-This function processes \strong{TCGA clinical data} and \strong{CNV (Copy Number Variation) data} to generate a
+This function processes TCGA clinical data and CNV (Copy Number Variation) data to generate a
 combined dataset for similarity analysis with mouse models.
 \itemize{
-\item \strong{Input Data:} Requires clinical data (\code{.tsv}) and CNV data (\code{.tsv}).
-\item \strong{User-defined Clinical Variables:} Extracted from risk factor history.
-\item \strong{CNV Data:} Filters CNV values for selected genes.
-\item \strong{Returns:} Merged data containing \strong{clinical variables} and \strong{CNV alterations}.
+\item Input Data: Requires clinical data (.tsv) and CNV data (.tsv).
+\item User-defined Clinical Variables: Extracted from risk factor history.
+\item CNV Data: Filters CNV values for selected genes.
+\item Returns: Merged data containing 'clinical variables' and 'CNV alterations'.
 }
 }
 \examples{

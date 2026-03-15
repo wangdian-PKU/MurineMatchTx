@@ -17,11 +17,11 @@ plot_DEG_heatmap(
 )
 }
 \arguments{
-\item{deg_data}{List. Output \verb{processed data} from \code{prepare_DEG_heatmap_data()}, containing processed TCGA and mouse DEG data.}
+\item{deg_data}{List. Output 'processed data' from 'prepare_DEG_heatmap_data()', containing processed TCGA and mouse DEG data.}
 
-\item{mouse_files}{Named list. The original input \code{mouse_files} from \code{merge_DEG_datasets()}, needed for column names.}
+\item{mouse_files}{Named list. The original input 'mouse_files' from 'merge_DEG_datasets()', needed for column names.}
 
-\item{col_names}{Character vector. Custom column names for the heatmap. Default uses \code{names(mouse_files)}.}
+\item{col_names}{Character vector. Custom column names for the heatmap. Default uses 'names(mouse_files)'.}
 
 \item{cluster_rows}{Logical. Whether to cluster rows (default: FALSE).}
 
@@ -36,10 +36,10 @@ plot_DEG_heatmap(
 \item{output_path}{Character. File path for saving the plot (default: "./DEG/").}
 }
 \value{
-A matrix (\code{merge_edger}) containing merged DEG expression data as the input object of \code{plot_DEG_barplot()}
+A matrix ('merge_edger') containing merged DEG expression data as the input object of 'plot_DEG_barplot()'
 }
 \description{
-This function generates a \strong{heatmap} of log fold changes (logFC)
+This function generates a heatmap of log fold changes (logFC)
 for differentially expressed genes (DEGs) across multiple datasets.
 }
 \examples{
