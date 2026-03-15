@@ -9,15 +9,15 @@ calculate_metabolism_score(eset_tpm, method = "pca", mini_gene_count = 2)
 \arguments{
 \item{eset_tpm}{Data frame. TPM-transformed RNA-seq expression matrix, output from \code{plot_TME_barplot()}.}
 
-\item{method}{Character. Method for score calculation (\code{"pca"}, \code{"ssgsea"}, \code{"zscore"}, \code{"integration"}). Default: \code{"pca"}.}
+\item{method}{Character. Method for score calculation ("pca", "ssgsea", "zscore", "integration"). Default: "pca".}
 
-\item{mini_gene_count}{Integer. Minimum gene count required per signature. Default: \code{2}.}
+\item{mini_gene_count}{Integer. Minimum gene count required per signature. Default: 2.}
 }
 \value{
 A data frame containing metabolism scores per sample.
 }
 \description{
-This function computes the \strong{metabolism-related gene signature score} using different methods.
+This function computes the metabolism-related gene signature score using different methods.
 }
 \examples{
 \dontrun{

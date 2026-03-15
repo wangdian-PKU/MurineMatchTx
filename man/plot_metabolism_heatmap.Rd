@@ -6,6 +6,7 @@
 \usage{
 plot_metabolism_heatmap(
   sig_meta,
+  group_as,
   output_path = "./metabolism",
   clustering_method = "manhattan",
   width = 10,
@@ -16,7 +17,9 @@ plot_metabolism_heatmap(
 )
 }
 \arguments{
-\item{sig_meta}{Data frame. Output from \code{calculate_metabolism_score()}.}
+\item{sig_meta}{Data frame. Output from 'calculate_metabolism_score()'.}
+
+\item{group_as}{Character vector. Group labels aligned to sample rows in 'sig_meta'.}
 
 \item{output_path}{Character. File path to save the heatmap (default: "./metabolism/").}
 

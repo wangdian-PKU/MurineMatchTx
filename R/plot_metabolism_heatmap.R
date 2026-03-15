@@ -3,6 +3,7 @@
 #' This function generates a heatmap of metabolism-related signature scores.
 #'
 #' @param sig_meta Data frame. Output from 'calculate_metabolism_score()'.
+#' @param group_as Character vector. Group labels aligned to sample rows in 'sig_meta'.
 #' @param output_path Character. File path to save the heatmap (default: "./metabolism/").
 #' @param clustering_method Character. Clustering method ("manhattan", "canberra"). Default: "manhattan".
 #' @param width Numeric. Width of the output PDF (default: 10).
@@ -18,6 +19,7 @@
 #'
 #' @export
 plot_metabolism_heatmap <- function(sig_meta,
+                                    group_as,
                                     output_path = "./metabolism",
                                     clustering_method = "manhattan",
                                     width = 10,
@@ -26,6 +28,9 @@ plot_metabolism_heatmap <- function(sig_meta,
                                     right_padding = 6,
                                     row_height_pt = 5) {
   if (!is.data.frame(sig_meta)) stop("Error: 'sig_meta' must be a data frame.")
+  if (!is.character(group_as) || length(group_as) != nrow(sig_meta)) {
+    stop("Error: 'group_as' must be a character vector with the same length as the number of rows in 'sig_meta'.")
+  }
   if (!clustering_method %in% c("manhattan", "canberra")) {
     stop("Error: 'clustering_method' must be 'manhattan' or 'canberra'.")
   }
