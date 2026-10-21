@@ -10,78 +10,323 @@ vignette: >
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  error = FALSE,
+  fig.width = 7,
+  fig.height = 4
 )
 library(MurineMatchTx)
+set.seed(42)
 ```
 
 # Introduction
 
-The **MurineMatchTx** R package provides a cross-species transcriptomic similarity analysis workflow for mouse and human cancer models. Example input files are distributed separately as the archive `example_data.rar` and can be downloaded from the GitHub Release page for this repository.
+This vignette runs a small, self-contained **MurineMatchTx** workflow using
+synthetic data. Every code chunk executes with the installed package; no download
+or separately distributed example archive is needed. The examples verify
+software behavior only. They are not biological validation, cross-species
+validation, or evidence that any mouse model represents human disease.
 
-# Example Data
+PCA is a QC and structure diagnostic. DEG concordance and TROM describe distinct
+aspects of the supplied data; they are not combined with PCA, GO, TME, or
+metabolism into a model-selection total score.
 
-Download `example_data.rar` from `https://github.com/wangdian-PKU/MurineMatchTx/releases/download/example-data/example_data.rar`, extract it locally, and use the resulting files as inputs to the functions shown below.
+# Synthetic expression and explicit sample metadata
 
-# DEG Volcano Plot
+The four samples and 200 shared gene labels below are invented. In real use,
+prepare a common, audited ortholog feature space before merging expression
+tables. `prepare_PCA_data()` merges matching gene labels; it does not establish
+orthology. These continuous values represent an already transformed expression
+scale for PCA and TROM, not raw counts or TPM.
 
-```{r, eval=FALSE}
-# Merging human and mouse DEG data
-merged_DEG <- merge_DEG_datasets(...)
-plot_DEG_volcano(deg_data = merged_DEG)
-```
-
-# DEG Heatmap and Barplot
-
-```{r, eval=FALSE}
-heatmap_input <- prepare_DEG_heatmap_data(...)
-merge_edger <- plot_DEG_heatmap(...)
-plot_DEG_barplot(merge_edger)
-```
-
-# PCA Similarity Analysis
-
-```{r, eval=FALSE}
-sample_counts <- list(
-  TCGA = c(normal = 2, tumor = 3),
-  GSEXXX = c(normal = 3, tumor = 3)
+```{r synthetic-expression}
+work_dir <- tempfile("MurineMatchTx-vignette-")
+dir.create(work_dir)
+sample_ids <- c("human_tumor", "human_normal", "mouse_normal", "mouse_tumor")
+expression <- matrix(
+  rnorm(200 * 4), nrow = 200,
+  dimnames = list(paste0("gene", seq_len(200)), sample_ids)
 )
-
-pca_data <- prepare_PCA_data(...)
-plot_PCA_tinyarray(pca_data)
+sample_metadata <- data.frame(
+  sample_id = sample_ids,
+  species = c("human", "human", "mouse", "mouse"),
+  dataset = c("HumanDemo", "HumanDemo", "MouseDemo", "MouseDemo"),
+  model = c("Reference", "Reference", "ModelA", "ModelA"),
+  tissue = c("tumor", "normal", "normal", "tumor")
+)
+human_expression_file <- file.path(work_dir, "human.csv")
+mouse_expression_file <- file.path(work_dir, "mouse.csv")
+write.csv(data.frame(X = rownames(expression), expression[, 1:2]),
+          human_expression_file, row.names = FALSE)
+write.csv(data.frame(X = rownames(expression), expression[, 3:4]),
+          mouse_expression_file, row.names = FALSE)
+sample_metadata
 ```
 
-# TROM Similarity Analysis
+# PCA first: uncorrected structure
 
-```{r, eval=FALSE}
-merge_clinic_CNV <- prepare_similarity_data(...)
-similarity <- compute_similarity_matrix(...)
-heatmap_res <- plot_TROMscore_heatmap(...)
-plot_TROMscore_boxplot(merge_long = heatmap_res$merge_long)
+Metadata are deliberately shuffled to demonstrate the join by `sample_id`.
+The default retains uncorrected data and records the choice. Here base R draws
+the four points without attempting group ellipses from one sample per group.
+For larger datasets, `plot_PCA_tinyarray()` accepts the same `pca_data` object.
+
+```{r pca-qc}
+pca_data <- prepare_PCA_data(
+  human_expression_file,
+  list(ModelA = mouse_expression_file),
+  sample_metadata = sample_metadata[c(4, 2, 1, 3), ]
+)
+stopifnot(
+  identical(pca_data$sample_metadata$sample_id, colnames(pca_data$merged_data)),
+  identical(pca_data$merged_data, pca_data$uncorrected_data),
+  identical(pca_data$parameters$batch_correction, FALSE),
+  is.null(pca_data$corrected_data)
+)
+pca <- prcomp(t(as.matrix(pca_data$uncorrected_data)), center = TRUE)
+plot(pca$x[, 1:2], pch = 19, xlab = "PC1", ylab = "PC2",
+     main = "Synthetic expression: QC only")
+text(pca$x[, 1:2], labels = rownames(pca$x), pos = 3, cex = 0.7)
+pca_data$parameters
 ```
 
-# Tumor Microenvironment Analysis
+ComBat requires an explicit `batch_correction = TRUE`. When species and dataset
+are completely confounded, it may remove biological species differences and the
+package warns about that limitation. Corrected output carries a provenance
+attribute and cannot be used as raw count or TPM input.
 
-When current human-reference deconvolution signatures are applied to mouse samples, TME results are exploratory, method-specific descriptions. They do not enter cross-species similarity scoring or model-selection decisions and do not establish cross-species validation without mouse-specific signatures or orthogonal immune evidence.
+# DEG formats and shared thresholds
 
-```{r, eval=FALSE}
-TME_result <- plot_TME_barplot(...)
-plot_TME_boxplot(TME_result)
+The next files mimic edgeR and DESeq2 output columns. `deg_method = "limma"`
+uses `logFC` and `adj.P.Val`; custom formats require explicit column mappings.
+The human contrast is called `TCGA` by the DEG interface even though all values
+here are synthetic. Fold-change cutoffs are inclusive and FDR cutoffs exclusive:
+an FDR of exactly 0.05 is stable under these thresholds.
+
+```{r deg-inputs}
+thresholds <- list(log2fc = 1, fdr = 0.05)
+human_ids <- paste0("ENSG00000", seq_len(4))
+mouse_ids <- paste0("ENSMUSG00000", seq_len(4))
+human_deg <- data.frame(
+  gene = human_ids, logFC = c(1, -1, 2, 0.5),
+  FDR = c(0.01, 0.01, 0.05, 0.01)
+)
+mouse_deg <- data.frame(
+  gene = mouse_ids, log2FoldChange = c(1.2, -1.5, 2, -0.5),
+  padj = c(0.02, 0.02, 0.01, 0.2)
+)
+human_deg_file <- file.path(work_dir, "human_deg.csv")
+mouse_deg_file <- file.path(work_dir, "mouse_deg.csv")
+write.csv(human_deg, human_deg_file, row.names = FALSE)
+write.csv(mouse_deg, mouse_deg_file, row.names = FALSE)
+mouse_files <- list(ModelA = mouse_deg_file)
+methods <- c(TCGA = "edgeR", ModelA = "DESeq2")
+merged_DEG <- merge_DEG_datasets(
+  human_deg_file, mouse_files, deg_method = methods,
+  gene_col = "gene", deg_thresholds = thresholds
+)
+stopifnot(identical(
+  merged_DEG$change[merged_DEG$contrast == "TCGA"],
+  c("Up", "Down", "Stable", "Stable")
+))
+merged_DEG
 ```
 
-# GO Enrichment Analysis
-
-```{r, eval=FALSE}
-GO_enrichment_analysis(...)
+```{r deg-volcano}
+deg_output <- paste0(file.path(work_dir, "deg"), "/")
+dir.create(deg_output)
+volcano <- plot_DEG_volcano(merged_DEG, output_path = deg_output)
+print(volcano)
 ```
 
-# Metabolism Scoring
+# Audited mapping, DEG heatmap and barplot
 
-When current human-reference metabolism signatures are applied to mouse samples, metabolism scores are exploratory, method-specific descriptions. They do not enter cross-species similarity scoring or model-selection decisions and do not establish cross-species validation without mouse-specific signatures or orthogonal metabolic evidence.
+The mapping below is a **fabricated contract fixture**, not a Compara export.
+Its `release` label explicitly records that origin. Real analyses need the
+actual mapping release and high-confidence one-to-one relationships; ambiguous
+and low-confidence pairs are excluded and the audit records their removal.
 
-```{r, eval=FALSE}
-sig_meta <- calculate_metabolism_score(...)
-plot_metabolism_heatmap(sig_meta)
+```{r deg-mapping-and-plots}
+ortholog_map <- data.frame(
+  human_gene_id = human_ids,
+  mouse_gene_id = mouse_ids,
+  human_gene_id_version = paste0(human_ids, ".1"),
+  mouse_gene_id_version = paste0(mouse_ids, ".1"),
+  homology_type = "ortholog_one2one",
+  is_high_confidence = TRUE,
+  release = "synthetic-software-example"
+)
+heatmap_input <- prepare_DEG_heatmap_data(
+  human_deg_file, mouse_files, deg_method = methods, gene_col = "gene",
+  deg_thresholds = thresholds, ortholog_map = ortholog_map
+)
+heatmap_input$mapping_audit
+merge_edger <- plot_DEG_heatmap(
+  heatmap_input, mouse_files, output_path = deg_output
+)
+stopifnot(
+  identical(rownames(merge_edger), human_ids[1:2]),
+  identical(as.numeric(merge_edger[, "ModelA"]), c(1, -1)),
+  identical(attr(merge_edger, "deg_thresholds"), thresholds)
+)
+print(plot_DEG_barplot(merge_edger, output_path = deg_output))
+```
+
+# TROM and a reference with no normal samples
+
+TROM uses explicit species and tissue metadata. Clinical/CNV annotations are
+optional, so they are omitted here. Tissue-mismatched entries are `NA`. To
+demonstrate the zero-normal branch, the second call explicitly marks both
+invented human samples as tumor; this is a software exercise, not a procedure
+for relabelling real samples.
+
+```{r trom}
+similarity <- compute_similarity_matrix(
+  as.matrix(pca_data$merged_data), sample_metadata = sample_metadata
+)
+stopifnot(is.na(
+  similarity$filtered_similarity_matrix["human_tumor", "mouse_normal"]
+))
+similarity$filtered_similarity_matrix
+
+tumor_reference_metadata <- sample_metadata
+tumor_reference_metadata$tissue[tumor_reference_metadata$species == "human"] <- "tumor"
+tumor_similarity <- compute_similarity_matrix(
+  as.matrix(pca_data$merged_data), sample_metadata = tumor_reference_metadata
+)
+trom_file <- file.path(work_dir, "trom.pdf")
+heatmap_res <- plot_TROMscore_heatmap(
+  dm_trom_del_backgroud_clinic = tumor_similarity$dm_trom_del_backgroud_clinic,
+  trom_matrix = tumor_similarity$similarity_matrix,
+  sample_metadata = tumor_reference_metadata,
+  output_path = trom_file
+)
+stopifnot(
+  identical(colnames(heatmap_res$plot_matrix), "mouse_tumor"),
+  all(as.character(heatmap_res$merge_long$group) == "tumor"),
+  file.exists(trom_file)
+)
+heatmap_res$merge_long
+```
+
+# Count/TPM provenance and the TME boundary
+
+Raw counts must be finite, non-negative whole numbers. TPM must be finite and
+non-negative. External data must declare `input_source`; the label documents
+provenance rather than proving it from the numbers. Do not relabel transformed
+or ComBat-corrected values as counts or TPM.
+
+This small matrix uses eight real gene symbols solely to exercise the bundled
+metabolism signatures. TPM is calculated from invented counts and invented
+gene lengths, with each sample summing to one million. Because this conversion
+is performed outside the package's TME workflow, its source is `provided_tpm`.
+
+```{r count-and-tpm}
+counts <- matrix(
+  c(10, 20, 30, 40, 50, 60, 70, 80,
+    25, 12, 44, 35, 61, 52, 83, 76,
+    40, 30, 20, 10, 80, 70, 60, 50,
+    35, 44, 12, 25, 76, 83, 52, 61),
+  nrow = 8,
+  dimnames = list(
+    c("HK1", "LDHA", "PFKM", "ENO1", "NDUFA1", "COX4I1", "ATP5F1A", "ATP5F1B"),
+    sample_ids
+  )
+)
+gene_length_kb <- c(1, 2, 1.5, 2.5, 1, 2, 1.5, 2.5)
+rates <- sweep(counts, 1, gene_length_kb, "/")
+provided_tpm <- sweep(rates, 2, colSums(rates), "/") * 1e6
+stopifnot(all(counts >= 0), all(counts == round(counts)),
+          all(is.finite(provided_tpm)), all(provided_tpm >= 0),
+          all(abs(colSums(provided_tpm) - 1e6) < 1e-8))
+tme_inputs <- list(
+  data_matrix = provided_tpm,
+  input_type = "TPM",
+  input_source = "provided_tpm",
+  method = "cibersort",
+  group_as = unname(pca_data$group_all)
+)
+stopifnot(length(tme_inputs$group_as) == ncol(tme_inputs$data_matrix))
+names(tme_inputs)
+```
+
+`tme_inputs` describes the input contract, not a deconvolution result. TME
+deconvolution is deliberately outside this offline example: eight genes cannot
+support meaningful immune composition estimates. With suitable real data,
+`plot_TME_barplot()` returns `eset_tpm`, `method_model`, and `input_metadata`;
+`plot_TME_boxplot()` instead takes a TPM data frame, group labels, and a
+condition list, and runs CIBERSORT again. Neither deconvolution is run here.
+
+When current human-reference deconvolution signatures are applied to mouse
+samples, TME results are exploratory, method-specific descriptions. They do not
+enter cross-species similarity scoring or model-selection decisions and do not
+establish cross-species validation without mouse-specific signatures or
+orthogonal immune evidence.
+
+# GO: define the input boundary
+
+The GO interface needs species-matched **gene symbols** and annotation data.
+The invented Ensembl-like IDs above are not valid annotation keys. We can
+execute the shared threshold selection and inspect the candidate IDs, but
+cannot infer biological enrichment from them. `GO_enrichment_analysis()` also
+requires at least two enriched GO terms for its similarity plot. This vignette
+does not run enrichment or load an annotation database to manufacture a result.
+
+```{r go-input-boundary}
+go_candidates <- subset(merged_DEG, contrast == "TCGA" & change != "Stable")
+stopifnot(identical(go_candidates$gene, human_ids[1:2]))
+go_contract <- data.frame(
+  species = "hsa", org_db = "org.Hs.eg.db", ontology = "BP",
+  required_identifiers = "human gene symbols",
+  candidates_in_fixture = nrow(go_candidates),
+  biological_annotation_available = FALSE
+)
+go_contract
+```
+
+# Offline metabolism scoring
+
+The local `zscore` path uses bundled signatures and does not run TME
+deconvolution. A one-gene minimum is used only to exercise the software on this
+tiny fixture; it is not a recommended analysis threshold. These synthetic
+scores have no metabolic interpretation.
+
+```{r metabolism}
+sig_meta <- calculate_metabolism_score(
+  provided_tpm, method = "zscore", mini_gene_count = 1,
+  input_source = "provided_tpm"
+)
+stopifnot(
+  is.data.frame(sig_meta), setequal(sig_meta$ID, sample_ids),
+  identical(attr(sig_meta, "MurineMatchTx_tpm_source"), "provided_tpm")
+)
+sig_meta
+score_groups <- sample_metadata$species[match(sig_meta$ID, sample_metadata$sample_id)]
+metabolism_dir <- file.path(work_dir, "metabolism")
+metabolism_heatmap <- plot_metabolism_heatmap(
+  sig_meta, group_as = score_groups, output_path = metabolism_dir, height = 6
+)
+stopifnot(file.exists(file.path(metabolism_dir, "heatmap.pdf")))
+```
+
+When current human-reference metabolism signatures are applied to mouse samples,
+scores are exploratory, method-specific descriptions. They do not enter
+cross-species similarity scoring or model-selection decisions and do not
+establish cross-species validation without mouse-specific signatures or
+orthogonal metabolic evidence.
+
+# Generated files
+
+All example inputs and saved plots are written to a new R temporary directory.
+The files verify that the plotting functions ran; the printed tables and plots
+above remain part of this vignette. No study data or project files are modified.
+
+```{r generated-files}
+expected_plots <- c(
+  file.path(deg_output, c("volcano_plot.pdf", "heatmap.pdf", "barplot.pdf")),
+  trom_file, file.path(metabolism_dir, "heatmap.pdf")
+)
+stopifnot(all(file.exists(expected_plots)))
+list.files(work_dir, recursive = TRUE)
 ```
 
 # Session Info
