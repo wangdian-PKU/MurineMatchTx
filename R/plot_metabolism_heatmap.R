@@ -2,6 +2,11 @@
 #'
 #' This function generates a heatmap of metabolism-related signature scores.
 #'
+#' When current human-reference metabolism signatures are applied to mouse samples, this
+#' heatmap is an exploratory description. It does not enter cross-species similarity scoring
+#' or model-selection decisions and does not establish cross-species validation without
+#' mouse-specific signatures or orthogonal metabolic evidence.
+#'
 #' @param sig_meta Data frame. Output from 'calculate_metabolism_score()'.
 #' @param group_as Character vector. Group labels aligned to sample rows in 'sig_meta'.
 #' @param output_path Character. File path to save the heatmap (default: "./metabolism/").

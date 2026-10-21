@@ -60,6 +60,10 @@ and visualizes the immune cell composition in a stacked barplot.
 \item Input Data: Users can provide either a raw count matrix (input_type = "count") or TPM data (input_type = "TPM").
 \item Group Definition: Users must provide a valid 'group_as' vector matching the sample order.
 \item Visualization: Saves a PDF file showing the fraction of immune cell types across groups.
+\item Interpretation: When current human-reference deconvolution signatures are applied to mouse samples,
+results are exploratory, method-specific descriptions. They do not enter cross-species similarity
+scoring or model-selection decisions and do not establish cross-species validation without mouse-specific
+signatures or orthogonal immune evidence.
 }
 }
 \examples{

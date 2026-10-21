@@ -4,7 +4,11 @@
 
 **MurineMatchTx** is an R package designed to address a central challenge in translational cancer research: quantitatively evaluating the **transcriptional similarity between mouse models and human cancer samples**. It provides a streamlined pipeline for cross-species integration of RNA-seq data, enabling researchers to assess the fidelity of preclinical models in mimicking human tumor biology.
 
-By integrating DEG analysis, PCA, TROM scoring, immune profiling, and GO enrichment in a unified workflow, MurineMatchTx helps researchers systematically identify **which mouse models best resemble human tumor subtypes** at the transcriptomic level.
+By integrating DEG analysis, PCA, TROM scoring, immune profiling, and GO enrichment in a unified workflow, MurineMatchTx helps researchers systematically compare mouse models with human tumor subtypes at the transcriptomic level.
+
+### Scope of TME and metabolism results
+
+When the current human-reference immune-deconvolution or metabolism signatures are applied to mouse samples, their results are exploratory, method-specific descriptions. They do not enter cross-species similarity scoring or model-selection decisions. These results do not establish cross-species validation without mouse-specific signatures or orthogonal immune or metabolic evidence.
 
 ### MurineMatchTx package workflow
 

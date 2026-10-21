@@ -12,6 +12,10 @@
 #' - Input Data: Users can provide either a raw count matrix (input_type = "count") or TPM data (input_type = "TPM").
 #' - Group Definition: Users must provide a valid 'group_as' vector matching the sample order.
 #' - Visualization: Saves a PDF file showing the fraction of immune cell types across groups.
+#' - Interpretation: When current human-reference deconvolution signatures are applied to mouse samples,
+#'   results are exploratory, method-specific descriptions. They do not enter cross-species similarity
+#'   scoring or model-selection decisions and do not establish cross-species validation without mouse-specific
+#'   signatures or orthogonal immune evidence.
 #'
 #' @importFrom IOBR count2tpm deconvo_tme cell_bar_plot
 #' @importFrom dplyr mutate group_by

@@ -31,6 +31,12 @@ A data frame containing metabolism scores per sample.
 \description{
 This function computes the metabolism-related gene signature score using different methods.
 }
+\details{
+When current human-reference metabolism signatures are applied to mouse samples, the
+resulting scores are exploratory descriptions. They do not enter cross-species similarity
+scoring or model-selection decisions and do not establish cross-species validation without
+mouse-specific signatures or orthogonal metabolic evidence.
+}
 \examples{
 \dontrun{
 sig_meta <- calculate_metabolism_score(eset_tpm, method = "pca", mini_gene_count = 2,

@@ -33,6 +33,12 @@ Saves multiple boxplots and returns a list of ggplot objects.
 This function computes immune infiltration scores using CIBERSORT and generates
 boxplots for multiple immune signatures.
 }
+\details{
+When current human-reference deconvolution signatures are applied to mouse samples,
+these plots are exploratory, method-specific descriptions. They do not enter
+cross-species similarity scoring or model-selection decisions and do not establish
+cross-species validation without mouse-specific signatures or orthogonal immune evidence.
+}
 \examples{
 \dontrun{
 group_as <- c(rep("HBV_normal", 3), rep("HBV_tumor", 3), rep("DEN_normal", 4), rep("DEN_tumor", 4))
