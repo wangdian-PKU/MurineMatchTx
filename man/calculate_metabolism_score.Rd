@@ -22,7 +22,9 @@ output from \code{plot_TME_barplot()}.}
 \item{input_source}{Character. Recorded TPM source: \code{"provided_tpm"} or
 \code{"count2tpm"}. Defaults to the source attached by \code{plot_TME_barplot()} or
 \code{"provided_tpm"} for directly supplied TPM data. ComBat-corrected input is
-rejected.}
+rejected. An external transformation without trusted provenance cannot be
+identified from its values alone; declare \code{"combat_corrected"} when
+applicable.}
 }
 \value{
 A data frame containing metabolism scores per sample.

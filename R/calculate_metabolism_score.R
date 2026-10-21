@@ -9,7 +9,9 @@
 #' @param input_source Character. Recorded TPM source: `"provided_tpm"` or
 #'   `"count2tpm"`. Defaults to the source attached by `plot_TME_barplot()` or
 #'   `"provided_tpm"` for directly supplied TPM data. ComBat-corrected input is
-#'   rejected.
+#'   rejected. An external transformation without trusted provenance cannot be
+#'   identified from its values alone; declare `"combat_corrected"` when
+#'   applicable.
 #' @param method Character. Method for score calculation ("pca", "ssgsea", "zscore", "integration"). Default: "pca".
 #' @param mini_gene_count Integer. Minimum gene count required per signature. Default: 2.
 #'

@@ -129,7 +129,9 @@ prepare_PCA_data <- function(tcga_file,
   }
 
   corrected_data <- if (correction_requested) {
-    sva::ComBat(dat = as.matrix(merged_data), batch = unname(batch))
+    corrected_data <- sva::ComBat(dat = as.matrix(merged_data), batch = unname(batch))
+    attr(corrected_data, "MurineMatchTx_tpm_source") <- "combat_corrected"
+    corrected_data
   } else {
     NULL
   }

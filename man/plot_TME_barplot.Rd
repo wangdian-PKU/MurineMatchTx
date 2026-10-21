@@ -18,7 +18,8 @@ plot_TME_barplot(
 \arguments{
 \item{data_matrix}{Data frame. 'Raw' count matrix or 'TPM' data (genes × samples).}
 
-\item{input_type}{Character. "count" (convert count to TPM) or "TPM" (use TPM directly). Default is "count".}
+\item{input_type}{Character. User-declared input type: "count" (convert
+count to TPM) or "TPM" (use TPM directly). Default is "count".}
 
 \item{method}{Character. The immune infiltration method ("cibersort", "mcpcounter", "xcell", "quantiseq").}
 
@@ -33,13 +34,16 @@ plot_TME_barplot(
 \item{input_source}{Character. Recorded source of the supplied matrix: \code{"raw_count"},
 \code{"provided_tpm"}, \code{"count2tpm"}, or \code{"combat_corrected"}. Defaults to
 \code{"raw_count"} for count and \code{"provided_tpm"} for TPM. ComBat-corrected
-input is rejected.}
+input is rejected. An external transformation without trusted provenance
+cannot be identified from its values alone; declare \code{"combat_corrected"}
+when applicable.}
 }
 \value{
 A list containing:
 \itemize{
 \item eset_tpm: The TPM-transformed expression matrix.
 \item method_model: Immune infiltration results.
+\item input_metadata: The declared input type, input source, and TPM source.
 \item A stacked barplot PDF file: Saved at 'output_path', showing immune cell fractions per group.
 }
 }

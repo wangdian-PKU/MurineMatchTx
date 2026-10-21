@@ -123,6 +123,16 @@ test_that("prepare_PCA_data defaults to uncorrected PCA data and records options
   expect_identical(corrected$merged_data, corrected$uncorrected_data)
   expect_true(is.matrix(corrected$corrected_data))
   expect_identical(dim(corrected$corrected_data), dim(corrected$uncorrected_data))
+  expect_identical(attr(corrected$corrected_data, "MurineMatchTx_tpm_source"), "combat_corrected")
+  expect_error(
+    plot_TME_barplot(
+      corrected$corrected_data,
+      input_type = "count",
+      method = "cibersort",
+      group_as = rep("A", ncol(corrected$corrected_data))
+    ),
+    "ComBat"
+  )
 })
 
 test_that("sample metadata errors name missing, extra, and duplicate samples", {

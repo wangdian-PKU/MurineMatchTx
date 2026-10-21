@@ -17,11 +17,14 @@
 #' @importFrom dplyr mutate group_by
 #'
 #' @param data_matrix Data frame. 'Raw' count matrix or 'TPM' data (genes × samples).
-#' @param input_type Character. "count" (convert count to TPM) or "TPM" (use TPM directly). Default is "count".
+#' @param input_type Character. User-declared input type: "count" (convert
+#'   count to TPM) or "TPM" (use TPM directly). Default is "count".
 #' @param input_source Character. Recorded source of the supplied matrix: `"raw_count"`,
 #'   `"provided_tpm"`, `"count2tpm"`, or `"combat_corrected"`. Defaults to
 #'   `"raw_count"` for count and `"provided_tpm"` for TPM. ComBat-corrected
-#'   input is rejected.
+#'   input is rejected. An external transformation without trusted provenance
+#'   cannot be identified from its values alone; declare `"combat_corrected"`
+#'   when applicable.
 #' @param method Character. The immune infiltration method ("cibersort", "mcpcounter", "xcell", "quantiseq").
 #' @param group_as Character vector. Clarify the specific names of different treatment groups and the respective numbers of normal and cancer groups in each of them.
 #' @param output_path Character. Directory to save the plot (default: "./TME").
@@ -31,6 +34,7 @@
 #' @return A list containing:
 #' - eset_tpm: The TPM-transformed expression matrix.
 #' - method_model: Immune infiltration results.
+#' - input_metadata: The declared input type, input source, and TPM source.
 #' - A stacked barplot PDF file: Saved at 'output_path', showing immune cell fractions per group.
 #'
 #' @examples
@@ -143,13 +147,6 @@ plot_TME_barplot <- function(data_matrix,
   }
 
   expression_matrix <- as.matrix(data_matrix)
-  if (!is.numeric(expression_matrix) || any(!is.finite(expression_matrix))) {
-    stop("Error: expression values must be finite numeric values.")
-  }
-  if (any(expression_matrix < 0)) {
-    stop("Error: expression values must be non-negative.")
-  }
-
   if (is.null(input_source)) {
     input_source <- attr(data_matrix, "MurineMatchTx_tpm_source")
   }
@@ -167,6 +164,12 @@ plot_TME_barplot <- function(data_matrix,
   }
   if (input_source == "combat_corrected") {
     stop("Error: ComBat-corrected expression cannot be used as raw count or TPM input.")
+  }
+  if (!is.numeric(expression_matrix) || any(!is.finite(expression_matrix))) {
+    stop("Error: expression values must be finite numeric values.")
+  }
+  if (any(expression_matrix < 0)) {
+    stop("Error: expression values must be non-negative.")
   }
   if (input_type == "count") {
     if (input_source != "raw_count") {

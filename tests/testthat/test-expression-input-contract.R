@@ -80,6 +80,24 @@ test_that("calculate_metabolism_score rejects negative TPM before scoring", {
   )
 })
 
+test_that("calculate_metabolism_score rejects explicitly labelled ComBat TPM", {
+  eset_tpm <- data.frame(
+    s1 = c(1, 2, 3),
+    s2 = c(4, 5, 6),
+    row.names = c("HK1", "LDHA", "PFKM")
+  )
+
+  expect_error(
+    calculate_metabolism_score(
+      eset_tpm,
+      method = "zscore",
+      mini_gene_count = 1,
+      input_source = "combat_corrected"
+    ),
+    "ComBat"
+  )
+})
+
 test_that("calculate_metabolism_score accepts TPM matrices from the TME workflow", {
   eset_tpm <- matrix(
     c(1, 2, 3, 4, 5, 6, 7, 8,
