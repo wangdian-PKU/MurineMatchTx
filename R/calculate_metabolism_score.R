@@ -3,7 +3,7 @@
 #' This function computes the metabolism-related gene signature score using different methods.
 #'
 #' When current human-reference metabolism signatures are applied to mouse samples, the
-#' resulting scores are exploratory descriptions. They do not enter cross-species similarity
+#' resulting scores are exploratory, method-specific descriptions. They do not enter cross-species similarity
 #' scoring or model-selection decisions and do not establish cross-species validation without
 #' mouse-specific signatures or orthogonal metabolic evidence.
 #'

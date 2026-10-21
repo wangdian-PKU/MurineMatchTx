@@ -43,7 +43,7 @@ This function generates a heatmap of metabolism-related signature scores.
 }
 \details{
 When current human-reference metabolism signatures are applied to mouse samples, this
-heatmap is an exploratory description. It does not enter cross-species similarity scoring
+heatmap is an exploratory, method-specific description. It does not enter cross-species similarity scoring
 or model-selection decisions and does not establish cross-species validation without
 mouse-specific signatures or orthogonal metabolic evidence.
 }

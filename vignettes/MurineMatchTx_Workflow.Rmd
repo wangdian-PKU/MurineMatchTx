@@ -77,7 +77,7 @@ GO_enrichment_analysis(...)
 
 # Metabolism Scoring
 
-When current human-reference metabolism signatures are applied to mouse samples, metabolism scores are exploratory descriptions. They do not enter cross-species similarity scoring or model-selection decisions and do not establish cross-species validation without mouse-specific signatures or orthogonal metabolic evidence.
+When current human-reference metabolism signatures are applied to mouse samples, metabolism scores are exploratory, method-specific descriptions. They do not enter cross-species similarity scoring or model-selection decisions and do not establish cross-species validation without mouse-specific signatures or orthogonal metabolic evidence.
 
 ```{r, eval=FALSE}
 sig_meta <- calculate_metabolism_score(...)
