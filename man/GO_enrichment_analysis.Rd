@@ -12,7 +12,12 @@ GO_enrichment_analysis(
   column_title,
   width = 10.36,
   height = 6.35,
-  output_path = "./enrichment"
+  output_path = "./enrichment",
+  deg_method = "edgeR",
+  lfc_col = NULL,
+  padj_col = NULL,
+  gene_col = NULL,
+  deg_thresholds = NULL
 )
 }
 \arguments{
@@ -31,13 +36,22 @@ GO_enrichment_analysis(
 \item{height}{Integer. The height of PDF (default: 6.35).}
 
 \item{output_path}{Character. Directory to save the PDF file (default: "./enrichment").}
+
+\item{deg_method}{One of \code{"edgeR"}, \code{"DESeq2"}, \code{"limma"}, or \code{"custom"}.}
+
+\item{lfc_col, padj_col, gene_col}{Optional explicit column names. Custom
+inputs require \code{lfc_col} and \code{padj_col}.}
+
+\item{deg_thresholds}{A list with \code{log2fc} and \code{fdr} shared with the other
+DEG modules.}
 }
 \value{
 Saves the GO enrichment analysis plot as a .pdf file.
 }
 \description{
 \itemize{
-\item Extracts significant DEGs (logFC > 1 & FDR < 0.05).
+\item Extracts significant DEGs with the shared inclusive log2 fold-change and
+exclusive adjusted-p thresholds.
 \item Reads input data automatically from .tsv or .csv files.
 \item Converts gene IDs based on the selected species (hsa, mmu, rno).
 \item Supports user-defined ontology (BP, MF, CC).
@@ -46,9 +60,10 @@ Saves the GO enrichment analysis plot as a .pdf file.
 }
 \details{
 This function performs GO enrichment analysis (BP, MF, CC)
-for differentially expressed genes (DEGs) obtained from edgeR analysis.
+for normalized differential expression results.
 \itemize{
-\item Input Data: The function requires an edgeR DEG results file.
+\item Input Data: The function accepts explicit edgeR, DESeq2, limma, or custom
+DEG formats.
 \item Supported File Formats: .tsv (tab-separated) and .csv (comma-separated).
 \item Supported Species: hsa (human), mmu (mouse), rno (rat).
 \item Ontology Options (ont):

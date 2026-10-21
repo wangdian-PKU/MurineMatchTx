@@ -8,65 +8,40 @@ merge_DEG_datasets(
   human_file_path,
   mouse_files,
   logFC_value = 1,
-  FDR_value = 0.05
+  FDR_value = 0.05,
+  deg_method = "edgeR",
+  lfc_col = NULL,
+  padj_col = NULL,
+  gene_col = NULL,
+  deg_thresholds = NULL
 )
 }
 \arguments{
-\item{human_file_path}{Character. Path to the TCGA human cancer DEG .tsv or .csv file.}
+\item{human_file_path}{Path to the human DEG result file.}
 
-\item{mouse_files}{Named list of file paths to mouse cancer model DEG .tsv or .csv files.
-Each element should be named according to the dataset source.}
+\item{mouse_files}{Named list of paths to mouse DEG result files.}
 
-\item{logFC_value}{Numeric. Threshold for log2 fold change (default: 1).}
+\item{logFC_value}{Deprecated-compatible fold-change threshold used only when
+\code{deg_thresholds} is \code{NULL}.}
 
-\item{FDR_value}{Numeric. Threshold for adjusted p-value (default: 0.05).}
+\item{FDR_value}{Deprecated-compatible adjusted-p threshold used only when
+\code{deg_thresholds} is \code{NULL}.}
+
+\item{deg_method}{One of \code{"edgeR"}, \code{"DESeq2"}, \code{"limma"}, or \code{"custom"}.
+A named character vector may specify a method for \code{TCGA} and each mouse
+dataset separately.}
+
+\item{lfc_col, padj_col, gene_col}{Optional explicit column names. Each may be
+scalar or named by dataset. Custom inputs require \code{lfc_col} and \code{padj_col}.}
+
+\item{deg_thresholds}{A list with \code{log2fc} and \code{fdr}. The classification rule
+is \code{logFC >= log2fc} or \code{logFC <= -log2fc}, together with \code{FDR < fdr}.}
 }
 \value{
-A merged data frame (\code{merge.diff}) with the following columns:
-\describe{
-\item{gene}{Gene identifier}
-\item{logFC}{Log fold change of gene expression}
-\item{FDR}{False discovery rate (adjusted p-value)}
-\item{contrast}{Dataset source (e.g., "TCGA", "Our", "GSE172629", etc.)}
-\item{change}{Gene expression change status: "Up", "Down", or "Stable"}
-}
+A data frame with \code{gene}, \code{logFC}, \code{FDR}, \code{contrast}, and \code{change}.
+The validated thresholds are stored in the \code{deg_thresholds} attribute.
 }
 \description{
-The function takes in:
-\enumerate{
-\item A DEG result file from TCGA (human cancer dataset)
-\item A list of DEG result files from various mouse cancer models (GEO data or user-provided data)
-}
-
-It merges all datasets into a single \code{merge.diff} dataframe with standardized
-column names and labels, making it suitable for visualization and further analysis.
-}
-\details{
-This function loads multiple DEG datasets (both human and mouse models),
-merges them into a single standardized format, and annotates each dataset
-with a group label for comparison.
-\itemize{
-\item Supported file formats: .tsv (tab-separated) and .csv (comma-separated).
-\item Required columns: 'gene', 'logFC', 'FDR'.
-\item If a file format is not supported, an error message will be displayed.
-\item DEG threshold: You can customize 'logFC' and 'FDR' thresholds (default: logFC > 1, FDR < 0.05).
-}
-}
-\examples{
-\dontrun{
-# Example file paths (replace with actual file paths)
-human_tcga_path <- "./data/TCGA_DEG.tsv"
-mouse_files <- list(
-  "Our_Model" = "./data/Our_Model_DEG.csv", # CSV format
-  "GSE172629" = "./data/GSE172629_DEG.tsv", # TSV format
-  "GSE208279" = "./data/GSE208279_DEG.tsv"
-)
-
-# Load and merge DEG data
-merged_data <- merge_DEG_datasets(human_tcga_path, mouse_files)
-
-# Display the first few rows
-head(merged_data)
-}
-
+Read human and mouse DEG result files through one explicit input contract,
+classify genes with shared thresholds, and combine the normalized results.
 }

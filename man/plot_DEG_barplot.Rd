@@ -9,7 +9,8 @@ plot_DEG_barplot(
   colors = list(up = "#ff7676", down = "#66d4ff"),
   width = 8,
   height = 4,
-  output_path = "./DEG/"
+  output_path = "./DEG/",
+  deg_thresholds = NULL
 )
 }
 \arguments{
@@ -23,6 +24,9 @@ Default: list(up = "#ff7676", down = "#66d4ff").}
 \item{height}{Integer. The height of ggplot_draw (default: 4).}
 
 \item{output_path}{Character. File path for saving the plot (default: "./DEG/").}
+
+\item{deg_thresholds}{Shared DEG threshold object. By default it is read from
+the \code{heatmap_data} attribute.}
 }
 \value{
 A 'ggplot' object representing the barplot visualization.

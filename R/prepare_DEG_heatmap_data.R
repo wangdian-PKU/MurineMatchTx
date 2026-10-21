@@ -1,102 +1,157 @@
 #' Prepare DEG Data for Heatmap Visualization
 #'
-#' This function preprocesses TCGA and mouse model DEG data by filtering significant genes,
-#' performing homologene conversion, and formatting logFC values.
+#' Normalize DEG inputs, apply one shared threshold object, and align human and
+#' mouse genes through an audited ortholog mapping.
 #'
-#' @description
-#' This function selects significant DEGs from TCGA data, applies homologene conversion,
-#' and standardizes logFC values for visualization in a heatmap.
+#' @param tcga_file Path to the human DEG result file.
+#' @param mouse_files Named list of mouse DEG result files.
+#' @param logFC,FDR Deprecated-compatible thresholds used only when
+#'   `deg_thresholds` is `NULL`.
+#' @param inTax,outTax Taxonomy IDs used only for the explicit HomoloGene
+#'   compatibility path.
+#' @param deg_method One of `"edgeR"`, `"DESeq2"`, `"limma"`, or `"custom"`;
+#'   may be a named vector by dataset.
+#' @param lfc_col,padj_col,gene_col Optional explicit column names, scalar or
+#'   named by dataset.
+#' @param deg_thresholds A list with `log2fc` and `fdr`.
+#' @param ortholog_map Standardized Compara mapping with stable and versioned
+#'   human/mouse IDs, `homology_type`, `is_high_confidence`, and `release`.
+#' @param mapping_source `"compara"` for the primary audited mapping or
+#'   `"homologene"` for an explicit compatibility/sensitivity analysis.
 #'
-#' @details
-#' - Filters TCGA genes using user-configurable 'logFC' and 'FDR' thresholds.
-#' - Performs homologene conversion to retain only mouse-human homologous genes.
-#' - Formats logFC values:
-#'   - '1' for TCGA high-expression genes.
-#'   - '-1' for TCGA low-expression genes.
-#'   - 'NA' for non-significant genes.
-#'
-#' @importFrom dplyr filter arrange mutate
-#' @importFrom homologene homologene
-#'
-#' @param tcga_file Character. Path to the TCGA DEG file.
-#' @param mouse_files Named list of file paths for mouse model DEG files.
-#' @param logFC Numeric. Absolute logFC threshold used to filter significant TCGA genes. Default is 1.
-#' @param FDR Numeric. FDR threshold used to filter significant TCGA genes. Default is 0.05.
-#' @param inTax Numeric. Input taxonomy ID (default: 9606 for human).
-#' @param outTax Numeric. Output taxonomy ID (default: 10090 for mouse).
-#'
-#' @return A list containing:
-#'   - 'processed_tcga': Processed TCGA DEG matrix.
-#'   - 'processed_mouse': Named list of processed mouse DEG matrices.
-#'   - 'tcga_gene_list': List of homologous genes used in processing.
-#'
-#' @examples
-#' \dontrun{
-#' # Example usage
-#' tcga_path <- "./data/TCGA_DEG.tsv"
-#' mouse_files <- list(
-#'   "Our_Model" = "./data/Our_Model_DEG.tsv",
-#'   "GSE172629" = "./data/GSE172629_DEG.tsv"
-#' )
-#'
-#' # Run data processing
-#' processed_data <- prepare_DEG_heatmap_data(tcga_path, mouse_files, logFC = 0.5, FDR = 0.1)
-#'
-#' # View processed TCGA data
-#' head(processed_data$processed_tcga)
-#'
-#' # View processed mouse data
-#' head(processed_data$processed_mouse$Our_Model)
-#' }
+#' @return A list containing normalized human data, aligned mouse data, the
+#'   human gene list, mapping audit, retained mapping, and thresholds.
 #'
 #' @export
-prepare_DEG_heatmap_data <- function(tcga_file, mouse_files, logFC = 1, FDR = 0.05, inTax = 9606, outTax = 10090) {
-  if (!is.numeric(logFC) || length(logFC) != 1 || is.na(logFC) || logFC < 0) {
-    stop("Error: 'logFC' must be a single non-negative number.")
+prepare_DEG_heatmap_data <- function(tcga_file,
+                                     mouse_files,
+                                     logFC = 1,
+                                     FDR = 0.05,
+                                     inTax = 9606,
+                                     outTax = 10090,
+                                     deg_method = "edgeR",
+                                     lfc_col = NULL,
+                                     padj_col = NULL,
+                                     gene_col = NULL,
+                                     deg_thresholds = NULL,
+                                     ortholog_map = NULL,
+                                     mapping_source = c("compara", "homologene")) {
+  if (!is.list(mouse_files) || is.null(names(mouse_files)) || any(!nzchar(names(mouse_files)))) {
+    stop("'mouse_files' must be a named list.", call. = FALSE)
   }
+  mapping_source <- match.arg(mapping_source)
+  thresholds <- .validate_deg_thresholds(deg_thresholds, logFC, FDR)
 
-  if (!is.numeric(FDR) || length(FDR) != 1 || is.na(FDR) || FDR < 0 || FDR > 1) {
-    stop("Error: 'FDR' must be a single number between 0 and 1.")
-  }
-
-  # Read TCGA DEG data
-  tcga_data <- read.table(tcga_file, header = TRUE, sep = "\t", row.names = 1)[, c(1, 4)]
-  # Filter genes using user-configurable TCGA thresholds
-  tcga_filtered <- tcga_data[abs(tcga_data$logFC) >= logFC & tcga_data$FDR < FDR, , drop = FALSE] %>%
-    arrange(desc(logFC))
-  # Get homologous genes
-  homolog_genes <- homologene(rownames(tcga_filtered), inTax = inTax, outTax = outTax)[, c(1:2)]
-  # Keep only homologous genes
-  tcga_filtered <- tcga_filtered[rownames(tcga_filtered) %in% homolog_genes[, 1], ]
-  # Count up-regulated and down-regulated genes
-  pos_count <- sum(tcga_filtered$logFC > 0)
-  neg_count <- sum(tcga_filtered$logFC < 0)
-  # Define change_colnames()
-  change_colnames <- function(data, name) {
-    colnames(data) <- paste(name, colnames(data), sep = "_")
-    # Filter non-significant genes
-    data[which(abs(data[, 1]) < 1 & data[, 2] < 0.05), 1] <- NA
-    # Up-regulated genes (logFC > 1)
-    data[1:pos_count, 1][which(data[1:pos_count, 1] > 1)] <- 1
-    data[1:pos_count, 1][which(data[1:pos_count, 1] < 1)] <- NA
-    # Down-regulated genes (logFC < -0.5)
-    data[(pos_count + 1):(pos_count + neg_count), 1][which(data[(pos_count + 1):(pos_count + neg_count), 1] < -0.5)] <- -1
-    data[(pos_count + 1):(pos_count + neg_count), 1][which(data[(pos_count + 1):(pos_count + neg_count), 1] > -0.5)] <- NA
-    return(data)
-  }
-  # Process mouse data
-  processed_mouse <- lapply(names(mouse_files), function(name) {
-    mouse_data <- read.table(mouse_files[[name]], header = TRUE, sep = "\t", row.names = 1)
-    # Filter strictly according to TCGA row names
-    mouse_data <- mouse_data[rownames(tcga_filtered), c(1, 4)] # Only keep logFC (column 1) and FDR (column 4)
-    # Call change_colnames() for processing
-    mouse_data <- change_colnames(mouse_data, name)
-    return(mouse_data)
+  human_all <- .normalize_deg_file(
+    tcga_file, "TCGA", deg_method, lfc_col, padj_col, gene_col
+  )
+  mouse <- lapply(names(mouse_files), function(dataset) {
+    .normalize_deg_file(
+      mouse_files[[dataset]], dataset, deg_method, lfc_col, padj_col, gene_col
+    )
   })
-  # Return processed data
-  return(list(
-    processed_tcga = tcga_filtered,
+  names(mouse) <- names(mouse_files)
+
+  human_all$change <- .classify_deg(human_all, thresholds)
+  human <- human_all[human_all$change != "Stable", , drop = FALSE]
+  human$stable_gene_id <- .strip_ensembl_version(human$gene)
+  duplicate_human <- unique(human$stable_gene_id[duplicated(human$stable_gene_id)])
+  if (length(duplicate_human) > 0) {
+    stop(
+      "Human DEG IDs are duplicate after removing Ensembl versions: ",
+      paste(utils::head(duplicate_human, 5), collapse = ", "),
+      call. = FALSE
+    )
+  }
+
+  if (mapping_source == "compara") {
+    if (is.null(ortholog_map)) {
+      stop("Primary analysis requires an explicit 'ortholog_map'.", call. = FALSE)
+    }
+  } else {
+    warning(
+      "HomoloGene is an explicit sensitivity/compatibility mapping, not the primary high-confidence mapping.",
+      call. = FALSE
+    )
+    homologs <- homologene::homologene(human$stable_gene_id, inTax = inTax, outTax = outTax)
+    if (nrow(homologs) == 0) {
+      ortholog_map <- data.frame(
+        human_gene_id = character(), mouse_gene_id = character(),
+        human_gene_id_version = character(), mouse_gene_id_version = character(),
+        homology_type = character(), is_high_confidence = logical(), release = character()
+      )
+    } else {
+      human_column <- as.character(inTax)
+      mouse_column <- as.character(outTax)
+      ortholog_map <- data.frame(
+        human_gene_id = as.character(homologs[[human_column]]),
+        mouse_gene_id = as.character(homologs[[mouse_column]]),
+        human_gene_id_version = as.character(homologs[[human_column]]),
+        mouse_gene_id_version = as.character(homologs[[mouse_column]]),
+        homology_type = "ortholog_one2one",
+        is_high_confidence = TRUE,
+        release = "HomoloGene build 68",
+        stringsAsFactors = FALSE
+      )
+    }
+  }
+
+  mapping_result <- .audit_ortholog_mapping(ortholog_map)
+  retained_mapping <- mapping_result$mapping
+  human <- human[order(-human$logFC, human$stable_gene_id), , drop = FALSE]
+  mapping_index <- match(human$stable_gene_id, retained_mapping$human_gene_id)
+  keep <- !is.na(mapping_index)
+  human <- human[keep, , drop = FALSE]
+  mapping_index <- mapping_index[keep]
+  human$mouse_gene_id <- retained_mapping$mouse_gene_id[mapping_index]
+
+  processed_tcga <- human[, c("logFC", "FDR"), drop = FALSE]
+  rownames(processed_tcga) <- human$stable_gene_id
+
+  processed_mouse <- lapply(mouse, function(mouse_deg) {
+    mouse_deg$stable_gene_id <- .strip_ensembl_version(mouse_deg$gene)
+    duplicate_mouse <- unique(mouse_deg$stable_gene_id[duplicated(mouse_deg$stable_gene_id)])
+    if (length(duplicate_mouse) > 0) {
+      stop(
+        "Mouse DEG IDs are duplicate after removing Ensembl versions: ",
+        paste(utils::head(duplicate_mouse, 5), collapse = ", "),
+        call. = FALSE
+      )
+    }
+    mouse_index <- match(human$mouse_gene_id, mouse_deg$stable_gene_id)
+    mouse_change <- rep(NA_character_, nrow(human))
+    present <- !is.na(mouse_index)
+    mouse_change[present] <- .classify_deg(mouse_deg[mouse_index[present], , drop = FALSE], thresholds)
+    concordant <- ifelse(
+      human$change == "Up" & mouse_change == "Up",
+      1,
+      ifelse(human$change == "Down" & mouse_change == "Down", -1, NA_real_)
+    )
+    adjusted_p <- rep(NA_real_, nrow(human))
+    adjusted_p[present] <- mouse_deg$FDR[mouse_index[present]]
+    output <- data.frame(change = concordant, FDR = adjusted_p)
+    rownames(output) <- human$stable_gene_id
+    output
+  })
+
+  mapping_audit <- rbind(
+    mapping_result$audit,
+    data.frame(
+      step = "human_significant_genes_mapped",
+      input_rows = sum(human_all$change != "Stable"),
+      removed_rows = sum(human_all$change != "Stable") - nrow(human),
+      retained_rows = nrow(human),
+      flagged_rows = 0L,
+      stringsAsFactors = FALSE
+    )
+  )
+
+  list(
+    processed_tcga = processed_tcga,
     processed_mouse = processed_mouse,
-    tcga_gene_list = rownames(tcga_filtered)
-  ))
+    tcga_gene_list = human$stable_gene_id,
+    mapping_audit = mapping_audit,
+    ortholog_map = retained_mapping,
+    deg_thresholds = thresholds
+  )
 }

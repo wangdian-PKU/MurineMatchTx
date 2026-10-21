@@ -2,63 +2,38 @@
 % Please edit documentation in R/compute_similarity_matrix.R
 \name{compute_similarity_matrix}
 \alias{compute_similarity_matrix}
-\title{Compute Similarity Matrix Between TCGA and Mouse Model Data}
+\title{Compute Similarity Matrix Between Human and Mouse Samples}
 \usage{
 compute_similarity_matrix(
   expression_matrix,
-  group_all,
-  tcga_sample_size,
-  tcga_normal_count,
-  merge_clinic_CNV,
-  cnv_genes,
-  clinical_vars
+  group_all = NULL,
+  tcga_sample_size = NULL,
+  tcga_normal_count = NULL,
+  merge_clinic_CNV = NULL,
+  cnv_genes = character(),
+  clinical_vars = character(),
+  sample_metadata = NULL
 )
 }
 \arguments{
-\item{expression_matrix}{The Batch-corrected expression data with genes as row names from 'prepare_PCA_data()'.}
+\item{expression_matrix}{Numeric gene-by-sample expression matrix.}
 
-\item{group_all}{The group information of TCGA and all mouse models from 'prepare_PCA_data()'.}
+\item{group_all, tcga_sample_size, tcga_normal_count}{Deprecated-compatible
+positional inputs used only when \code{sample_metadata} is \code{NULL}.}
 
-\item{tcga_sample_size}{Integer. Number of TCGA samples in the dataset.}
+\item{merge_clinic_CNV}{Optional human clinical/CNV table keyed by
+\code{PATIENT_ID}. Missing patients are retained with missing annotations.}
 
-\item{tcga_normal_count}{Integer. Number of TCGA normal samples.}
+\item{cnv_genes, clinical_vars}{Requested annotation columns.}
 
-\item{merge_clinic_CNV}{Data frame. Processed TCGA clinical + CNV data from 'prepare_similarity_data()'.}
-
-\item{cnv_genes}{Character vector. Gene names for CNV annotations (e.g., c("TP53", "PTEN")).}
-
-\item{clinical_vars}{Character vector. User-defined clinical variables to extract (e.g., c("Hepatitis B", "Non-Alcoholic")).}
+\item{sample_metadata}{Data frame containing at least \code{sample_id}, \code{species},
+\code{dataset}, \code{model}, and \code{tissue}.}
 }
 \value{
-A list containing:
-\describe{
-\item{similarity_matrix}{The full transcriptional similarity matrix before background removal.}
-\item{dm_trom_del_backgroud_clinic}{The filtered similarity matrix merged with clinical data.}
-}
+A list with raw and tissue-filtered similarity matrices, the
+annotated human-sample table, and metadata in expression-column order.
 }
 \description{
-\itemize{
-\item Formats the input expression matrix by setting gene IDs as the first column.
-\item Extracts TCGA and mouse model expression data from a preprocessed matrix.
-\item Computes a similarity matrix using 'ws.trom()', comparing TCGA with mouse models.
-\item Filters similarity data to retain only relevant comparisons (tumor vs. tumor, normal vs. normal).
-\item Incorporates TCGA clinical data by merging with 'merge_clinic_CNV'.
-}
-}
-\details{
-This function calculates a transcriptional similarity matrix between TCGA samples and mouse models.
-}
-\examples{
-\dontrun{
-similarity_results <- compute_similarity_matrix(
-  expression_matrix = pca_data$corrected_data,
-  group_all = pca_data$group_all,
-  tcga_sample_size = 424,
-  tcga_normal_count = 50,
-  merge_clinic_CNV = merge_clinic_CNV,
-  cnv_genes = c("TP53", "PTEN"),
-  clinical_vars = c("Hepatitis B", "Non-Alcoholic")
-)
-}
-
+Split an expression matrix by explicit species metadata, compute TROM scores,
+and retain only tissue-matched normal-normal and tumor-tumor comparisons.
 }

@@ -14,6 +14,8 @@
 #' @param width Integer. The width of pdf (default: 7.9).
 #' @param height Integer. The height of pdf (default: 5.95).
 #' @param output_path Character. File path for saving the plot (default: "./DEG/").
+#' @param deg_thresholds Shared DEG threshold object. By default it is read from
+#'   `deg_data$deg_thresholds` and propagated to the returned matrix.
 #'
 #' @return A matrix ('merge_edger') containing merged DEG expression data as the input object of 'plot_DEG_barplot()'
 #'
@@ -32,10 +34,19 @@ plot_DEG_heatmap <- function(deg_data,
                              color_palette = c("1" = "#ff7676", "-1" = "#66d4ff", "NA" = "white"),
                              width = 7.9,
                              height = 5.95,
-                             output_path = "./DEG/") {
+                             output_path = "./DEG/",
+                             deg_thresholds = NULL) {
   # Ensure input is correctly formatted
   if (!is.list(deg_data) || !all(c("processed_tcga", "processed_mouse", "tcga_gene_list") %in% names(deg_data))) {
     stop("Error: Input data must be the output from 'prepare_DEG_heatmap_data()'.")
+  }
+  embedded_thresholds <- deg_data$deg_thresholds
+  thresholds <- .validate_deg_thresholds(
+    if (is.null(deg_thresholds)) embedded_thresholds else deg_thresholds
+  )
+  if (!is.null(deg_thresholds) && !is.null(embedded_thresholds) &&
+      !identical(thresholds, .validate_deg_thresholds(embedded_thresholds))) {
+    stop("'deg_thresholds' do not match the thresholds used to prepare DEG data.", call. = FALSE)
   }
 
   # Extract processed mouse DEG data
@@ -94,5 +105,6 @@ plot_DEG_heatmap <- function(deg_data,
   message("Heatmap saved to: ", output_file)
 
   # Return merged matrix for downstream analysis
+  attr(merge_edger, "deg_thresholds") <- thresholds
   return(merge_edger)
 }
