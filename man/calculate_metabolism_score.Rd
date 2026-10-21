@@ -4,14 +4,25 @@
 \alias{calculate_metabolism_score}
 \title{Calculate Metabolism Signature Score}
 \usage{
-calculate_metabolism_score(eset_tpm, method = "pca", mini_gene_count = 2)
+calculate_metabolism_score(
+  eset_tpm,
+  method = "pca",
+  mini_gene_count = 2,
+  input_source = NULL
+)
 }
 \arguments{
-\item{eset_tpm}{Data frame. TPM-transformed RNA-seq expression matrix, output from \code{plot_TME_barplot()}.}
+\item{eset_tpm}{Data frame or matrix. TPM-transformed RNA-seq expression matrix,
+output from \code{plot_TME_barplot()}.}
 
 \item{method}{Character. Method for score calculation ("pca", "ssgsea", "zscore", "integration"). Default: "pca".}
 
 \item{mini_gene_count}{Integer. Minimum gene count required per signature. Default: 2.}
+
+\item{input_source}{Character. Recorded TPM source: \code{"provided_tpm"} or
+\code{"count2tpm"}. Defaults to the source attached by \code{plot_TME_barplot()} or
+\code{"provided_tpm"} for directly supplied TPM data. ComBat-corrected input is
+rejected.}
 }
 \value{
 A data frame containing metabolism scores per sample.

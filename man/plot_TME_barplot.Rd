@@ -11,7 +11,8 @@ plot_TME_barplot(
   group_as,
   output_path = "./TME",
   height = 5.2,
-  width = 10
+  width = 10,
+  input_source = NULL
 )
 }
 \arguments{
@@ -28,6 +29,11 @@ plot_TME_barplot(
 \item{height}{Numeric. Height of the output PDF (default: 5.2).}
 
 \item{width}{Numeric. Width of the output PDF (default: 10).}
+
+\item{input_source}{Character. Recorded source of the supplied matrix: \code{"raw_count"},
+\code{"provided_tpm"}, \code{"count2tpm"}, or \code{"combat_corrected"}. Defaults to
+\code{"raw_count"} for count and \code{"provided_tpm"} for TPM. ComBat-corrected
+input is rejected.}
 }
 \value{
 A list containing:
