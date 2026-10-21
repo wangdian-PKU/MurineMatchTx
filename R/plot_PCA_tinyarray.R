@@ -5,18 +5,19 @@
 #' @importFrom tinyarray draw_pca
 #'
 #' @param pca_data List. Output from 'prepare_PCA_data()', containing merged expression data.
-#' @param batch_correction Logical. Whether to use batch-corrected data (default: 'TRUE').
+#' @param batch_correction Logical. Whether to use batch-corrected data (default:
+#'   `FALSE`).
 #' @param colors Character vector. Colors for different groups.
 #'
 #' @examples
 #' \dontrun{
 #' # draw PCA
-#' plot_PCA_tinyarray(pca_data = pca_data, batch_correction = T)
+#' plot_PCA_tinyarray(pca_data = pca_data)
 #' }
 #'
 #' @export
 plot_PCA_tinyarray <- function(pca_data,
-                               batch_correction = TRUE,
+                               batch_correction = FALSE,
                                colors = NULL) {
   # Ensure input data is correct
   if (!is.list(pca_data) || !all(c("merged_data", "group_all", "batch", "corrected_data") %in% names(pca_data))) {

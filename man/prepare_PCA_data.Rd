@@ -8,7 +8,7 @@ prepare_PCA_data(
   tcga_file,
   mouse_files,
   sample_counts = NULL,
-  batch_correction = TRUE,
+  batch_correction = FALSE,
   sample_metadata = NULL
 )
 }
@@ -20,15 +20,17 @@ prepare_PCA_data(
 \item{sample_counts}{Deprecated-compatible named count list. It is used only
 when \code{sample_metadata} is \code{NULL}.}
 
-\item{batch_correction}{Whether to apply \code{sva::ComBat}.}
+\item{batch_correction}{Whether to apply \code{sva::ComBat}. Defaults to \code{FALSE}
+so PCA reflects the uncorrected expression structure.}
 
 \item{sample_metadata}{Data frame containing at least \code{sample_id}, \code{species},
 \code{dataset}, \code{model}, and \code{tissue}. Optional columns such as \code{batch},
 \code{pair_id}, and \code{subtype} are retained.}
 }
 \value{
-A list containing the merged matrix, sample labels, batch labels,
-optional corrected matrix, and metadata in matrix-column order.
+A list containing the uncorrected merged matrix, sample labels, batch
+labels, an optional corrected matrix, parameter settings, and metadata in
+matrix-column order.
 }
 \description{
 Merge expression files by gene and join sample annotations by \code{sample_id}.

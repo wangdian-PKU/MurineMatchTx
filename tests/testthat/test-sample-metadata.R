@@ -63,6 +63,68 @@ test_that("prepare_PCA_data joins shuffled metadata by sample_id", {
   expect_identical(unname(result$batch), result$sample_metadata$dataset)
 })
 
+test_that("prepare_PCA_data defaults to uncorrected PCA data and records options", {
+  tcga_file <- tempfile(fileext = ".csv")
+  mouse_file <- tempfile(fileext = ".csv")
+  genes <- paste0("g", seq_len(10))
+
+  write.csv(
+    data.frame(
+      X = genes,
+      h_tumor = seq_len(10),
+      h_normal = rev(seq_len(10)) + 20
+    ),
+    tcga_file,
+    row.names = FALSE
+  )
+  write.csv(
+    data.frame(
+      X = genes,
+      m_normal = seq_len(10)^2 + 30,
+      m_tumor = seq_len(10) * 3 + 41
+    ),
+    mouse_file,
+    row.names = FALSE
+  )
+
+  metadata <- data.frame(
+    sample_id = c("h_tumor", "h_normal", "m_normal", "m_tumor"),
+    species = c("human", "human", "mouse", "mouse"),
+    dataset = c("TCGA", "TCGA", "GSE-test", "GSE-test"),
+    model = c("TCGA", "TCGA", "ModelA", "ModelA"),
+    tissue = c("tumor", "normal", "normal", "tumor"),
+    stringsAsFactors = FALSE
+  )
+
+  uncorrected <- prepare_PCA_data(
+    tcga_file,
+    list(ModelA = mouse_file),
+    sample_metadata = metadata
+  )
+
+  expect_null(uncorrected$corrected_data)
+  expect_identical(uncorrected$parameters$batch_correction, FALSE)
+  expect_identical(uncorrected$merged_data, uncorrected$uncorrected_data)
+  expect_false(any(grepl("rank", names(uncorrected), ignore.case = TRUE)))
+  expect_identical(formals(plot_PCA_tinyarray)$batch_correction, FALSE)
+
+  corrected <- NULL
+  expect_warning(
+    corrected <- prepare_PCA_data(
+      tcga_file,
+      list(ModelA = mouse_file),
+      sample_metadata = metadata,
+      batch_correction = TRUE
+    ),
+    "species.*dataset.*confounded"
+  )
+
+  expect_identical(corrected$parameters$batch_correction, TRUE)
+  expect_identical(corrected$merged_data, corrected$uncorrected_data)
+  expect_true(is.matrix(corrected$corrected_data))
+  expect_identical(dim(corrected$corrected_data), dim(corrected$uncorrected_data))
+})
+
 test_that("sample metadata errors name missing, extra, and duplicate samples", {
   fixture <- make_expression_fixture()
   metadata <- fixture$metadata

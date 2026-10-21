@@ -8,20 +8,22 @@
 #' @param mouse_files Named list of mouse expression files.
 #' @param sample_counts Deprecated-compatible named count list. It is used only
 #'   when `sample_metadata` is `NULL`.
-#' @param batch_correction Whether to apply `sva::ComBat`.
+#' @param batch_correction Whether to apply `sva::ComBat`. Defaults to `FALSE`
+#'   so PCA reflects the uncorrected expression structure.
 #' @param sample_metadata Data frame containing at least `sample_id`, `species`,
 #'   `dataset`, `model`, and `tissue`. Optional columns such as `batch`,
 #'   `pair_id`, and `subtype` are retained.
 #'
-#' @return A list containing the merged matrix, sample labels, batch labels,
-#'   optional corrected matrix, and metadata in matrix-column order.
+#' @return A list containing the uncorrected merged matrix, sample labels, batch
+#'   labels, an optional corrected matrix, parameter settings, and metadata in
+#'   matrix-column order.
 #'
 #' @importFrom sva ComBat
 #' @export
 prepare_PCA_data <- function(tcga_file,
                              mouse_files,
                              sample_counts = NULL,
-                             batch_correction = TRUE,
+                             batch_correction = FALSE,
                              sample_metadata = NULL) {
   read_expression_file <- function(file) {
     extension <- tolower(tools::file_ext(file))
@@ -113,7 +115,20 @@ prepare_PCA_data <- function(tcga_file,
   )
   batch <- stats::setNames(sample_metadata$dataset, sample_metadata$sample_id)
 
-  corrected_data <- if (isTRUE(batch_correction)) {
+  correction_requested <- isTRUE(batch_correction)
+  if (correction_requested &&
+      length(unique(sample_metadata$species)) > 1 &&
+      all(vapply(split(sample_metadata$species, sample_metadata$dataset),
+        function(species) length(unique(species)) == 1L,
+        logical(1)
+      ))) {
+    warning(
+      "Batch correction requested although species and dataset are completely confounded; ComBat may remove biological species differences.",
+      call. = FALSE
+    )
+  }
+
+  corrected_data <- if (correction_requested) {
     sva::ComBat(dat = as.matrix(merged_data), batch = unname(batch))
   } else {
     NULL
@@ -123,7 +138,9 @@ prepare_PCA_data <- function(tcga_file,
     merged_data = merged_data,
     group_all = group_all,
     batch = batch,
+    uncorrected_data = merged_data,
     corrected_data = corrected_data,
+    parameters = list(batch_correction = correction_requested),
     sample_metadata = sample_metadata
   )
 }
