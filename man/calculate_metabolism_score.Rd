@@ -20,11 +20,10 @@ output from \code{plot_TME_barplot()}.}
 \item{mini_gene_count}{Integer. Minimum gene count required per signature. Default: 2.}
 
 \item{input_source}{Character. Recorded TPM source: \code{"provided_tpm"} or
-\code{"count2tpm"}. Defaults to the source attached by \code{plot_TME_barplot()} or
-\code{"provided_tpm"} for directly supplied TPM data. ComBat-corrected input is
-rejected. An external transformation without trusted provenance cannot be
-identified from its values alone; declare \code{"combat_corrected"} when
-applicable.}
+\code{"count2tpm"}. Required for external TPM data without the trusted source
+attached by \code{plot_TME_barplot()}. ComBat-corrected input is rejected. This
+0.99.0 pre-release contract avoids treating unlabelled external
+transformations as TPM data.}
 }
 \value{
 A data frame containing metabolism scores per sample.
@@ -34,7 +33,8 @@ This function computes the metabolism-related gene signature score using differe
 }
 \examples{
 \dontrun{
-sig_meta <- calculate_metabolism_score(eset_tpm, method = "pca", mini_gene_count = 2)
+sig_meta <- calculate_metabolism_score(eset_tpm, method = "pca", mini_gene_count = 2,
+                                        input_source = "provided_tpm")
 }
 
 }

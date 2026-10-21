@@ -14,6 +14,7 @@ test_that("plot_TME_barplot rejects invalid count inputs before conversion", {
     plot_TME_barplot(
       continuous_matrix,
       input_type = "count",
+      input_source = "raw_count",
       method = "cibersort",
       group_as = c("A", "B")
     ),
@@ -23,6 +24,7 @@ test_that("plot_TME_barplot rejects invalid count inputs before conversion", {
     plot_TME_barplot(
       negative_matrix,
       input_type = "count",
+      input_source = "raw_count",
       method = "cibersort",
       group_as = c("A", "B")
     ),
@@ -49,20 +51,56 @@ test_that("plot_TME_barplot rejects explicitly labelled ComBat input", {
   )
 })
 
-test_that("expression input validation accepts counts and non-negative TPM", {
+test_that("expression input validation requires source for external matrices", {
   count_matrix <- matrix(c(10, 20, 30, 40), nrow = 2)
   tpm_matrix <- matrix(c(0, 12.5, 30, 45.5), nrow = 2)
 
+  expect_error(
+    MurineMatchTx:::.validate_expression_input(count_matrix, "count"),
+    "explicit 'input_source'"
+  )
+  expect_error(
+    MurineMatchTx:::.validate_expression_input(tpm_matrix, "TPM"),
+    "explicit 'input_source'"
+  )
   expect_identical(
-    MurineMatchTx:::.validate_expression_input(count_matrix, "count")$input_source,
+    MurineMatchTx:::.validate_expression_input(
+      count_matrix,
+      "count",
+      input_source = "raw_count"
+    )$input_source,
     "raw_count"
   )
   expect_identical(
-    MurineMatchTx:::.validate_expression_input(tpm_matrix, "TPM")$input_source,
+    MurineMatchTx:::.validate_expression_input(
+      tpm_matrix,
+      "TPM",
+      input_source = "provided_tpm"
+    )$input_source,
     "provided_tpm"
   )
+  expect_identical(
+    MurineMatchTx:::.validate_expression_input(
+      tpm_matrix,
+      "TPM",
+      input_source = "count2tpm"
+    )$input_source,
+    "count2tpm"
+  )
   expect_error(
-    MurineMatchTx:::.validate_expression_input(-tpm_matrix, "TPM"),
+    MurineMatchTx:::.validate_expression_input(
+      count_matrix,
+      "count",
+      input_source = "combat_corrected"
+    ),
+    "ComBat"
+  )
+  expect_error(
+    MurineMatchTx:::.validate_expression_input(
+      -tpm_matrix,
+      "TPM",
+      input_source = "provided_tpm"
+    ),
     "non-negative"
   )
 })
@@ -75,7 +113,12 @@ test_that("calculate_metabolism_score rejects negative TPM before scoring", {
   )
 
   expect_error(
-    calculate_metabolism_score(eset_tpm, method = "zscore", mini_gene_count = 1),
+    calculate_metabolism_score(
+      eset_tpm,
+      method = "zscore",
+      mini_gene_count = 1,
+      input_source = "provided_tpm"
+    ),
     "non-negative"
   )
 })

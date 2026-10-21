@@ -7,11 +7,10 @@
 #' @param eset_tpm Data frame or matrix. TPM-transformed RNA-seq expression matrix,
 #'   output from `plot_TME_barplot()`.
 #' @param input_source Character. Recorded TPM source: `"provided_tpm"` or
-#'   `"count2tpm"`. Defaults to the source attached by `plot_TME_barplot()` or
-#'   `"provided_tpm"` for directly supplied TPM data. ComBat-corrected input is
-#'   rejected. An external transformation without trusted provenance cannot be
-#'   identified from its values alone; declare `"combat_corrected"` when
-#'   applicable.
+#'   `"count2tpm"`. Required for external TPM data without the trusted source
+#'   attached by `plot_TME_barplot()`. ComBat-corrected input is rejected. This
+#'   0.99.0 pre-release contract avoids treating unlabelled external
+#'   transformations as TPM data.
 #' @param method Character. Method for score calculation ("pca", "ssgsea", "zscore", "integration"). Default: "pca".
 #' @param mini_gene_count Integer. Minimum gene count required per signature. Default: 2.
 #'
@@ -19,7 +18,8 @@
 #'
 #' @examples
 #' \dontrun{
-#' sig_meta <- calculate_metabolism_score(eset_tpm, method = "pca", mini_gene_count = 2)
+#' sig_meta <- calculate_metabolism_score(eset_tpm, method = "pca", mini_gene_count = 2,
+#'                                         input_source = "provided_tpm")
 #' }
 #'
 #' @export

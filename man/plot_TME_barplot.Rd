@@ -32,11 +32,10 @@ count to TPM) or "TPM" (use TPM directly). Default is "count".}
 \item{width}{Numeric. Width of the output PDF (default: 10).}
 
 \item{input_source}{Character. Recorded source of the supplied matrix: \code{"raw_count"},
-\code{"provided_tpm"}, \code{"count2tpm"}, or \code{"combat_corrected"}. Defaults to
-\code{"raw_count"} for count and \code{"provided_tpm"} for TPM. ComBat-corrected
-input is rejected. An external transformation without trusted provenance
-cannot be identified from its values alone; declare \code{"combat_corrected"}
-when applicable.}
+\code{"provided_tpm"}, \code{"count2tpm"}, or \code{"combat_corrected"}. Required for
+external matrices without a trusted \code{MurineMatchTx_tpm_source} attribute.
+ComBat-corrected input is rejected. This 0.99.0 pre-release contract avoids
+treating unlabelled external transformations as raw count or TPM data.}
 }
 \value{
 A list containing:
@@ -69,7 +68,7 @@ and visualizes the immune cell composition in a stacked barplot.
 group_as <- c(rep("TCGA_normal", 50), rep("TCGA_tumor", 374), rep("HBV Pten KO_normal", 3), rep("HBV Pten KO_tumor", 3))
 
 # TME barplot
-TME_barplot_result <- plot_TME_barplot(data_matrix = merge.data, input_type = "count", method = "cibersort", group_as = group_as)
+TME_barplot_result <- plot_TME_barplot(data_matrix = merge.data, input_type = "count", input_source = "raw_count", method = "cibersort", group_as = group_as)
 
 # Extract TPM matrix for further analysis
 eset_tpm <- TME_barplot_result$eset_tpm

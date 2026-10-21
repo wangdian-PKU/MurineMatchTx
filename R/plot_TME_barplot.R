@@ -20,11 +20,10 @@
 #' @param input_type Character. User-declared input type: "count" (convert
 #'   count to TPM) or "TPM" (use TPM directly). Default is "count".
 #' @param input_source Character. Recorded source of the supplied matrix: `"raw_count"`,
-#'   `"provided_tpm"`, `"count2tpm"`, or `"combat_corrected"`. Defaults to
-#'   `"raw_count"` for count and `"provided_tpm"` for TPM. ComBat-corrected
-#'   input is rejected. An external transformation without trusted provenance
-#'   cannot be identified from its values alone; declare `"combat_corrected"`
-#'   when applicable.
+#'   `"provided_tpm"`, `"count2tpm"`, or `"combat_corrected"`. Required for
+#'   external matrices without a trusted `MurineMatchTx_tpm_source` attribute.
+#'   ComBat-corrected input is rejected. This 0.99.0 pre-release contract avoids
+#'   treating unlabelled external transformations as raw count or TPM data.
 #' @param method Character. The immune infiltration method ("cibersort", "mcpcounter", "xcell", "quantiseq").
 #' @param group_as Character vector. Clarify the specific names of different treatment groups and the respective numbers of normal and cancer groups in each of them.
 #' @param output_path Character. Directory to save the plot (default: "./TME").
@@ -43,7 +42,7 @@
 #' group_as <- c(rep("TCGA_normal", 50), rep("TCGA_tumor", 374), rep("HBV Pten KO_normal", 3), rep("HBV Pten KO_tumor", 3))
 #'
 #' # TME barplot
-#' TME_barplot_result <- plot_TME_barplot(data_matrix = merge.data, input_type = "count", method = "cibersort", group_as = group_as)
+#' TME_barplot_result <- plot_TME_barplot(data_matrix = merge.data, input_type = "count", input_source = "raw_count", method = "cibersort", group_as = group_as)
 #'
 #' # Extract TPM matrix for further analysis
 #' eset_tpm <- TME_barplot_result$eset_tpm
@@ -151,7 +150,10 @@ plot_TME_barplot <- function(data_matrix,
     input_source <- attr(data_matrix, "MurineMatchTx_tpm_source")
   }
   if (is.null(input_source)) {
-    input_source <- if (input_type == "count") "raw_count" else "provided_tpm"
+    stop(
+      "Error: external expression data require an explicit 'input_source' ",
+      "unless they carry a trusted 'MurineMatchTx_tpm_source' attribute."
+    )
   }
 
   valid_sources <- c("raw_count", "provided_tpm", "count2tpm", "combat_corrected")

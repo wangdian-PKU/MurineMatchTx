@@ -5,7 +5,12 @@ test_that("calculate_metabolism_score uses bundled metabolism signatures", {
     row.names = c("HK1", "LDHA", "PFKM", "ENO1", "NDUFA1", "COX4I1", "ATP5F1A", "ATP5F1B")
   )
 
-  sig_meta <- calculate_metabolism_score(eset_tpm, method = "zscore", mini_gene_count = 1)
+  sig_meta <- calculate_metabolism_score(
+    eset_tpm,
+    method = "zscore",
+    mini_gene_count = 1,
+    input_source = "provided_tpm"
+  )
 
   expect_s3_class(sig_meta, "data.frame")
   expect_true("ID" %in% colnames(sig_meta))
