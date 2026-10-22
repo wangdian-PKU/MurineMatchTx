@@ -34,6 +34,20 @@ devtools::install_github("wangdian-PKU/MurineMatchTx")
 
 Detailed guidance of how to use MurineMatchTx could be found in the https://wangdian-pku.github.io/MurineMatchTxManual/.
 
+### CI and analysis environments
+
+The Windows/Linux CI installs dependencies, runs testthat and the executable
+vignette, builds the source package, and checks that exact tarball with
+`R CMD check --as-cran`. Each run saves commands, logs, `sessionInfo()`, system
+information, installed package versions and check results as artifacts. TROM
+1.2 is selected from the CRAN archive because it is an archived dependency.
+The matrix follows the current R release; it is not a frozen analysis environment.
+macOS is deferred until the full dependency chain has a verified installation.
+
+The formal R540_2 analysis project's `renv.lock` belongs to that analysis project.
+Creating or updating it requires the stage 5 remote-environment authorization;
+this package repository does not create that lockfile or modify the server.
+
 ---
 
 ## 4. Contact us

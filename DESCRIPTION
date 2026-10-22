@@ -10,8 +10,8 @@ Authors@R:
           family = "Guan",
           email = "guanguiwen@bjmu.edu.cn",
           role = "aut"))
-Description: MurineMatchTx is a comprehensive R package designed for cross-species
-  transcriptomic similarity analysis between human cancer and clinical
+Description: Provides cross-species transcriptomic similarity analysis
+  between human cancer and clinical
   mouse models. It implements standardized pipelines for DEG analysis, homolog
   gene conversion, PCA, immune infiltration, GO enrichment, and similarity
   scoring. With built-in data formatting and flexible visualization functions,
@@ -49,7 +49,7 @@ Imports:
 Depends: 
     R (>= 3.5)
 Suggests: 
-    testthat,
+    testthat (>= 3.0.0),
     knitr,
     rmarkdown
 Config/testthat/edition: 3

@@ -69,10 +69,16 @@ signatures or orthogonal immune evidence.
 \examples{
 \dontrun{
 # Example usage (using raw count matrix)
-group_as <- c(rep("TCGA_normal", 50), rep("TCGA_tumor", 374), rep("HBV Pten KO_normal", 3), rep("HBV Pten KO_tumor", 3))
+group_as <- c(
+  rep("TCGA_normal", 50), rep("TCGA_tumor", 374),
+  rep("HBV Pten KO_normal", 3), rep("HBV Pten KO_tumor", 3)
+)
 
 # TME barplot
-TME_barplot_result <- plot_TME_barplot(data_matrix = merge.data, input_type = "count", input_source = "raw_count", method = "cibersort", group_as = group_as)
+TME_barplot_result <- plot_TME_barplot(
+  data_matrix = merge.data, input_type = "count", input_source = "raw_count",
+  method = "cibersort", group_as = group_as
+)
 
 # Extract TPM matrix for further analysis
 eset_tpm <- TME_barplot_result$eset_tpm
