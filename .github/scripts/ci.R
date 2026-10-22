@@ -1,6 +1,10 @@
 args <- commandArgs(trailingOnly = TRUE)
 stopifnot(length(args) == 1L)
 stage <- match.arg(args, c("install", "test", "vignette", "build", "check", "environment"))
+if (.Platform$OS.type == "windows") {
+  locale_variables <- c("LC_ALL", "LC_COLLATE", "LC_CTYPE", "LC_MONETARY", "LC_TIME", "LANG")
+  do.call(Sys.setenv, as.list(stats::setNames(rep("C", length(locale_variables)), locale_variables)))
+}
 root <- normalizePath(".", winslash = "/", mustWork = TRUE)
 results <- file.path(dirname(root), "check-results")
 dir.create(results, showWarnings = FALSE)
@@ -47,8 +51,14 @@ if (stage == "install") {
                     envir = new.env(parent = globalenv()), quiet = FALSE)
 } else if (stage == "build") {
   stopifnot(!file.exists(tarball))
+  source_tree <- file.path(tempdir(), package)
+  dir.create(source_tree)
+  source_entries <- list.files(root, all.files = TRUE, no.. = TRUE, full.names = TRUE)
+  source_entries <- source_entries[basename(source_entries) != ".git"]
+  copied <- file.copy(source_entries, source_tree, recursive = TRUE, copy.date = TRUE)
+  if (!all(copied)) stop("Failed to stage the package source tree for building.")
   setwd(results)
-  run_r(c("CMD", "build", root), "build")
+  run_r(c("CMD", "build", source_tree), "build")
   stopifnot(file.exists(tarball))
   writeLines(c(basename(tarball), digest::digest(file = tarball, algo = "sha256")),
              file.path(results, "tarball-sha256.txt"))
@@ -56,6 +66,7 @@ if (stage == "install") {
   stopifnot(file.exists(tarball), !dir.exists(file.path(results, paste0(package, ".Rcheck"))))
   hash <- readLines(file.path(results, "tarball-sha256.txt"))
   stopifnot(identical(hash, c(basename(tarball), digest::digest(file = tarball, algo = "sha256"))))
+  Sys.setenv("_R_CHECK_CRAN_INCOMING_REMOTE_" = "false")
   setwd(results)
   run_r(c("CMD", "check", "--as-cran", tarball), "check")
   check_log <- readLines(file.path(results, paste0(package, ".Rcheck"), "00check.log"))
