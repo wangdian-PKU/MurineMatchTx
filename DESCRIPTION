@@ -10,14 +10,15 @@ Authors@R:
           family = "Guan",
           email = "guanguiwen@bjmu.edu.cn",
           role = "aut"))
-Description: Provides cross-species transcriptomic similarity analysis
-  between human cancer and clinical
-  mouse models. It implements standardized pipelines for DEG analysis, homolog
-  gene conversion, PCA, immune infiltration, GO enrichment, and similarity
-  scoring. With built-in data formatting and flexible visualization functions,
-  MurineMatchTx enables reproducible and scalable evaluation of murine models that
-  best mimic human disease transcriptional profiles, facilitating rational
-  model selection in translational research.
+Description: Provides a standardized exploratory workflow for relative
+  transcriptomic comparison between human tumors and mouse cancer models. It
+  connects explicit input contracts, audited ortholog mapping, module-specific
+  analyses, standardized outputs, and package-native visualizations for
+  differential expression, uncorrected principal component analysis,
+  transcriptome overlap scoring, functional enrichment, and exploratory immune
+  and metabolic profiling. The workflow records sample metadata, thresholds,
+  mapping provenance, and input checks so users can interpret each result
+  against a prespecified research question and module-specific endpoint.
 License: GPL-3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

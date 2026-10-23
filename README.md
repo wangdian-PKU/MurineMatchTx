@@ -2,13 +2,17 @@
 
 ## 1. Introduction
 
-**MurineMatchTx** is an R package designed to address a central challenge in translational cancer research: quantitatively evaluating the **transcriptional similarity between mouse models and human cancer samples**. It provides a streamlined pipeline for cross-species integration of RNA-seq data, enabling researchers to assess the fidelity of preclinical models in mimicking human tumor biology.
+**MurineMatchTx** is an R package for standardized exploratory comparison of human tumors and mouse cancer models at the transcriptomic level. Users define the research question, select the corresponding module and endpoint, and interpret results within the specified input data, ortholog mapping, and analytical parameters.
 
-By integrating DEG analysis, PCA, TROM scoring, immune profiling, and GO enrichment in a unified workflow, MurineMatchTx helps researchers systematically compare mouse models with human tumor subtypes at the transcriptomic level.
+### Technical contribution
+
+MurineMatchTx connects explicit sample metadata, standardized DEG inputs, audited ortholog mapping, shared threshold objects, input validation, standardized outputs, package-native visualizations, and an executable workflow. It integrates established methods for DEG comparison, uncorrected PCA, TROM scoring, GO enrichment, and exploratory immune and metabolic profiling through documented cross-module data handoffs.
+
+Each module retains its own endpoint. DEG analysis evaluates tumor-versus-normal regulatory concordance, PCA diagnoses global structure and source effects, TROM measures sample-associated gene-set overlap, GO summarizes functional themes, and TME and metabolic modules describe signals derived from human reference signatures. Conflicting module results remain visible and are interpreted against the prespecified research question rather than combined into a universal score.
 
 ### Scope of TME and metabolism results
 
-When the current human-reference immune-deconvolution or metabolism signatures are applied to mouse samples, their results are exploratory, method-specific descriptions. They do not enter cross-species similarity scoring or model-selection decisions. These results do not establish cross-species validation without mouse-specific signatures or orthogonal immune or metabolic evidence.
+With the current human-reference signatures, TME and metabolism results provide exploratory, method-specific descriptions and remain separate from model-selection endpoints. Cross-species validation requires mouse-specific signatures or orthogonal immune or metabolic evidence.
 
 ### MurineMatchTx package workflow
 

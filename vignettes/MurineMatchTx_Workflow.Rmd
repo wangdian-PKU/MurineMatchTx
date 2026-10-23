@@ -23,13 +23,19 @@ set.seed(42)
 
 This vignette runs a small, self-contained **MurineMatchTx** workflow using
 synthetic data. Every code chunk executes with the installed package; no download
-or separately distributed example archive is needed. The examples verify
-software behavior only. They are not biological validation, cross-species
-validation, or evidence that any mouse model represents human disease.
+or separately distributed example archive is needed.
 
-PCA is a QC and structure diagnostic. DEG concordance and TROM describe distinct
-aspects of the supplied data; they are not combined with PCA, GO, TME, or
-metabolism into a model-selection total score.
+MurineMatchTx connects explicit sample metadata, standardized DEG inputs,
+audited ortholog mapping, shared thresholds, input validation, standardized
+outputs, package-native visualizations, and executable examples. The workflow
+integrates established analysis methods through documented data handoffs.
+
+Module selection follows the research question. PCA is a QC and structure
+diagnostic, while DEG concordance and TROM describe distinct transcriptomic
+endpoints. GO, TME, and metabolism retain their own functional or exploratory
+endpoints, so cross-module differences remain visible rather than being reduced
+to a universal score. The synthetic examples below verify software behavior;
+biological validation requires real study data and orthogonal evidence.
 
 # Synthetic expression and explicit sample metadata
 
