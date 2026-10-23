@@ -1,14 +1,14 @@
 make_mapping_fixture <- function() {
   data.frame(
-    human_gene_id = c("ENSG000001", "ENSG000002", "ENSG000003", "ENSG000004", "ENSG000004", "ENSG000006"),
-    mouse_gene_id = c("ENSMUSG000001", "ENSMUSG000002", "ENSMUSG000003", "ENSMUSG000004", "ENSMUSG000005", "ENSMUSG000006"),
-    human_gene_id_version = c("ENSG000001.1", "ENSG000002.1", "ENSG000003.1", "ENSG000004.1", "ENSG000004.1", "ENSG000006.2"),
-    mouse_gene_id_version = c("ENSMUSG000001.1", "ENSMUSG000002.1", "ENSMUSG000003.1", "ENSMUSG000004.1", "ENSMUSG000005.1", "ENSMUSG000006.2"),
-    homology_type = c("ortholog_one2one", "ortholog_one2many", "ortholog_one2one", "ortholog_one2one", "ortholog_one2one", "ortholog_one2one"),
-    is_high_confidence = c(1, 1, 0, 1, 1, 1),
-    release = rep(116L, 6),
-    human_gene_symbol = c("shared", "B", "C", "D", "D", "shared"),
-    mouse_gene_symbol = c("a", "b", "c", "d", "e", "f"),
+    human_gene_id = c("ENSG000001", "ENSG000002", "ENSG000003", "ENSG000004", "ENSG000004", "ENSG000006", "ENSG000007", "ENSG000008"),
+    mouse_gene_id = c("ENSMUSG000001", "ENSMUSG000002", "ENSMUSG000003", "ENSMUSG000004", "ENSMUSG000005", "ENSMUSG000006", "ENSMUSG000007", NA_character_),
+    human_gene_id_version = c("ENSG000001.1", "ENSG000002.1", "ENSG000003.1", "ENSG000004.1", "ENSG000004.1", "ENSG000006.2", "ENSG000007.1", "ENSG000008.1"),
+    mouse_gene_id_version = c("ENSMUSG000001.1", "ENSMUSG000002.1", "ENSMUSG000003.1", "ENSMUSG000004.1", "ENSMUSG000005.1", "ENSMUSG000006.2", "ENSMUSG000007.1", NA_character_),
+    homology_type = c("ortholog_one2one", "ortholog_one2many", "ortholog_one2one", "ortholog_one2one", "ortholog_one2one", "ortholog_one2one", "ortholog_many2many", "ortholog_one2one"),
+    is_high_confidence = c(1, 1, 0, 1, 1, 1, 1, 1),
+    release = rep(116L, 8),
+    human_gene_symbol = c("shared", "B", "C", "D", "D", "shared", "E", "F"),
+    mouse_gene_symbol = c("a", "b", "c", "d", "e", "f", "g", NA_character_),
     stringsAsFactors = FALSE
   )
 }
@@ -16,7 +16,7 @@ make_mapping_fixture <- function() {
 test_that("ortholog audit conservatively retains high-confidence unique one-to-one pairs", {
   mapping <- make_mapping_fixture()
   audit_a <- MurineMatchTx:::.audit_ortholog_mapping(mapping)
-  audit_b <- MurineMatchTx:::.audit_ortholog_mapping(mapping[c(6, 4, 2, 5, 1, 3), ])
+  audit_b <- MurineMatchTx:::.audit_ortholog_mapping(mapping[c(8, 6, 4, 2, 7, 5, 1, 3), ])
 
   expect_identical(
     audit_a$mapping[, c("human_gene_id", "mouse_gene_id")],
@@ -25,6 +25,8 @@ test_that("ortholog audit conservatively retains high-confidence unique one-to-o
   expect_identical(audit_a$mapping$human_gene_id, c("ENSG000001", "ENSG000006"))
   expect_true(all(c("step", "input_rows", "removed_rows", "retained_rows") %in% colnames(audit_a$audit)))
   expect_equal(audit_a$audit$removed_rows[audit_a$audit$step == "exclude_one_to_many"], 1)
+  expect_equal(audit_a$audit$removed_rows[audit_a$audit$step == "exclude_many_to_many"], 1)
+  expect_equal(audit_a$audit$removed_rows[audit_a$audit$step == "complete_identifiers"], 1)
   expect_equal(audit_a$audit$removed_rows[audit_a$audit$step == "exclude_low_confidence"], 1)
   expect_equal(audit_a$audit$removed_rows[audit_a$audit$step == "exclude_duplicate_ids"], 2)
   expect_equal(audit_a$audit$flagged_rows[audit_a$audit$step == "duplicate_human_symbol_labels"], 4)
@@ -44,7 +46,7 @@ test_that("ortholog audit rejects inconsistent stable and versioned IDs", {
 test_that("DEG heatmap preparation uses mapped mouse IDs and shared thresholds", {
   human <- data.frame(
     logFC = c(1, -1, 2),
-    FDR = c(0.01, 0.01, 0.05),
+    FDR = c(0.01, 0.01, 0.01),
     row.names = c("ENSG000001.1", "ENSG000006.2", "ENSG000007.1")
   )
   mouse <- data.frame(
@@ -54,11 +56,12 @@ test_that("DEG heatmap preparation uses mapped mouse IDs and shared thresholds",
   )
   human_file <- write_deg_fixture(human)
   mouse_file <- write_deg_fixture(mouse)
+  mouse_missing_file <- write_deg_fixture(mouse[c(1, 3), , drop = FALSE])
   mapping <- make_mapping_fixture()[c(1, 6), ]
 
   result <- prepare_DEG_heatmap_data(
     human_file,
-    list(ModelA = mouse_file),
+    list(ModelA = mouse_file, ModelB = mouse_missing_file),
     deg_method = "edgeR",
     deg_thresholds = list(log2fc = 1, fdr = 0.05),
     ortholog_map = mapping
@@ -66,7 +69,23 @@ test_that("DEG heatmap preparation uses mapped mouse IDs and shared thresholds",
 
   expect_identical(result$tcga_gene_list, c("ENSG000001", "ENSG000006"))
   expect_identical(result$processed_mouse$ModelA[[1]], c(1, -1))
+  expect_identical(result$processed_mouse$ModelB[[1]], c(1, NA_real_))
   expect_equal(tail(result$mapping_audit$retained_rows, 1), 2)
+  expect_identical(
+    result$gene_loss_audit,
+    data.frame(
+      dataset = c("TCGA", "TCGA", "TCGA", "ModelA", "ModelA", "ModelA", "ModelB", "ModelB", "ModelB"),
+      step = c(
+        "normalized_input", "significant_genes", "primary_mapping",
+        "normalized_input", "primary_mapping", "selected_human_orthologs_present",
+        "normalized_input", "primary_mapping", "selected_human_orthologs_present"
+      ),
+      input_genes = c(3L, 3L, 3L, 3L, 3L, 2L, 2L, 2L, 2L),
+      removed_genes = c(0L, 0L, 1L, 0L, 1L, 0L, 0L, 1L, 1L),
+      retained_genes = c(3L, 3L, 2L, 3L, 2L, 2L, 2L, 1L, 1L),
+      stringsAsFactors = FALSE
+    )
+  )
   expect_identical(result$deg_thresholds, list(log2fc = 1, fdr = 0.05))
 })
 

@@ -20,7 +20,8 @@
 #'   `"homologene"` for an explicit compatibility/sensitivity analysis.
 #'
 #' @return A list containing normalized human data, aligned mouse data, the
-#'   human gene list, mapping audit, retained mapping, and thresholds.
+#'   human gene list, mapping audit, per-dataset gene-loss audit, retained
+#'   mapping, and thresholds.
 #'
 #' @export
 prepare_DEG_heatmap_data <- function(tcga_file,
@@ -54,6 +55,7 @@ prepare_DEG_heatmap_data <- function(tcga_file,
 
   human_all$change <- .classify_deg(human_all, thresholds)
   human <- human_all[human_all$change != "Stable", , drop = FALSE]
+  human_significant_count <- nrow(human)
   human$stable_gene_id <- .strip_ensembl_version(human$gene)
   duplicate_human <- unique(human$stable_gene_id[duplicated(human$stable_gene_id)])
   if (length(duplicate_human) > 0) {
@@ -108,7 +110,8 @@ prepare_DEG_heatmap_data <- function(tcga_file,
   processed_tcga <- human[, c("logFC", "FDR"), drop = FALSE]
   rownames(processed_tcga) <- human$stable_gene_id
 
-  processed_mouse <- lapply(mouse, function(mouse_deg) {
+  processed_mouse_result <- lapply(names(mouse), function(dataset) {
+    mouse_deg <- mouse[[dataset]]
     mouse_deg$stable_gene_id <- .strip_ensembl_version(mouse_deg$gene)
     duplicate_mouse <- unique(mouse_deg$stable_gene_id[duplicated(mouse_deg$stable_gene_id)])
     if (length(duplicate_mouse) > 0) {
@@ -131,8 +134,38 @@ prepare_DEG_heatmap_data <- function(tcga_file,
     adjusted_p[present] <- mouse_deg$FDR[mouse_index[present]]
     output <- data.frame(change = concordant, FDR = adjusted_p)
     rownames(output) <- human$stable_gene_id
-    output
+    mapped_input <- mouse_deg$stable_gene_id %in% retained_mapping$mouse_gene_id
+    list(
+      data = output,
+      audit = data.frame(
+        dataset = dataset,
+        step = c("normalized_input", "primary_mapping", "selected_human_orthologs_present"),
+        input_genes = c(nrow(mouse_deg), nrow(mouse_deg), nrow(human)),
+        removed_genes = c(0L, sum(!mapped_input), sum(!present)),
+        retained_genes = c(nrow(mouse_deg), sum(mapped_input), sum(present)),
+        stringsAsFactors = FALSE
+      )
+    )
   })
+  names(processed_mouse_result) <- names(mouse)
+  processed_mouse <- lapply(processed_mouse_result, `[[`, "data")
+
+  gene_loss_audit <- rbind(
+    data.frame(
+      dataset = "TCGA",
+      step = c("normalized_input", "significant_genes", "primary_mapping"),
+      input_genes = c(nrow(human_all), nrow(human_all), human_significant_count),
+      removed_genes = c(
+        0L,
+        nrow(human_all) - human_significant_count,
+        human_significant_count - nrow(human)
+      ),
+      retained_genes = c(nrow(human_all), human_significant_count, nrow(human)),
+      stringsAsFactors = FALSE
+    ),
+    do.call(rbind, lapply(processed_mouse_result, `[[`, "audit"))
+  )
+  rownames(gene_loss_audit) <- NULL
 
   mapping_audit <- rbind(
     mapping_result$audit,
@@ -151,6 +184,7 @@ prepare_DEG_heatmap_data <- function(tcga_file,
     processed_mouse = processed_mouse,
     tcga_gene_list = human$stable_gene_id,
     mapping_audit = mapping_audit,
+    gene_loss_audit = gene_loss_audit,
     ortholog_map = retained_mapping,
     deg_thresholds = thresholds
   )

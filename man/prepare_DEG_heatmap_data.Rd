@@ -47,7 +47,8 @@ human/mouse IDs, \code{homology_type}, \code{is_high_confidence}, and \code{rele
 }
 \value{
 A list containing normalized human data, aligned mouse data, the
-human gene list, mapping audit, retained mapping, and thresholds.
+human gene list, mapping audit, per-dataset gene-loss audit, retained
+mapping, and thresholds.
 }
 \description{
 Normalize DEG inputs, apply one shared threshold object, and align human and
