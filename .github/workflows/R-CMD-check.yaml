@@ -17,6 +17,7 @@ jobs:
         os: [windows-latest, ubuntu-latest]
     env:
       R_KEEP_PKG_SOURCE: yes
+      CHECK_RESULTS_DIR: ${{ runner.temp }}/check-results
     steps:
       - uses: actions/checkout@v6
         with:
@@ -61,5 +62,5 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: R-check-${{ matrix.os }}
-          path: ../check-results/
+          path: ${{ env.CHECK_RESULTS_DIR }}/
           if-no-files-found: error

@@ -6,8 +6,12 @@ if (.Platform$OS.type == "windows") {
   do.call(Sys.setenv, as.list(stats::setNames(rep("C", length(locale_variables)), locale_variables)))
 }
 root <- normalizePath(".", winslash = "/", mustWork = TRUE)
-results <- file.path(dirname(root), "check-results")
+results <- Sys.getenv(
+  "CHECK_RESULTS_DIR",
+  unset = file.path(dirname(root), "check-results")
+)
 dir.create(results, showWarnings = FALSE)
+results <- normalizePath(results, winslash = "/", mustWork = TRUE)
 log <- file(file.path(results, paste0(stage, ".log")), open = "wt")
 sink(log, split = TRUE)
 sink(log, type = "message")
