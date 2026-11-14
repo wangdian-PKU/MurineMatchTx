@@ -17,7 +17,6 @@ jobs:
         os: [windows-latest, ubuntu-latest]
     env:
       R_KEEP_PKG_SOURCE: yes
-      CHECK_RESULTS_DIR: ${{ runner.temp }}/check-results
     steps:
       - uses: actions/checkout@v6
         with:
@@ -26,6 +25,18 @@ jobs:
         with:
           r-version: 'release'
           use-public-rspm: true
+      - name: Configure CI results directory
+        shell: Rscript {0}
+        run: |
+          results <- file.path(
+            normalizePath(Sys.getenv("RUNNER_TEMP"), winslash = "/", mustWork = TRUE),
+            "check-results"
+          )
+          cat(
+            paste0("CHECK_RESULTS_DIR=", results, "\n"),
+            file = Sys.getenv("GITHUB_ENV"),
+            append = TRUE
+          )
       - uses: r-lib/actions/setup-pandoc@v2
       - uses: r-lib/actions/setup-tinytex@v2
       - name: Update TeX Live package manager
@@ -62,5 +73,5 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: R-check-${{ matrix.os }}
-          path: ${{ env.CHECK_RESULTS_DIR }}/
+          path: ${{ runner.temp }}/check-results/
           if-no-files-found: error
