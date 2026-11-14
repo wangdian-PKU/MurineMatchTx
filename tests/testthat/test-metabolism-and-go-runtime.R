@@ -1,20 +1,29 @@
-test_that("calculate_metabolism_score uses bundled metabolism signatures", {
+test_that("calculate_metabolism_score returns the complete IOBR metabolism panel", {
   eset_tpm <- data.frame(
-    s1 = c(1, 2, 3, 4, 5, 6, 7, 8),
-    s2 = c(2, 3, 4, 5, 6, 7, 8, 9),
-    row.names = c("HK1", "LDHA", "PFKM", "ENO1", "NDUFA1", "COX4I1", "ATP5F1A", "ATP5F1B")
+    s1 = c(1, 2, 1),
+    s2 = c(2, 4, 2),
+    s3 = c(4, 8, 4),
+    row.names = c("HK1", "LDHA", "TBXAS1")
   )
 
   sig_meta <- calculate_metabolism_score(
     eset_tpm,
-    method = "zscore",
+    method = "relative_zscore",
     mini_gene_count = 1,
     input_source = "provided_tpm"
   )
 
   expect_s3_class(sig_meta, "data.frame")
-  expect_true("ID" %in% colnames(sig_meta))
-  expect_true(any(colnames(sig_meta) != "ID"))
+  expect_identical(colnames(sig_meta)[1], "ID")
+  expect_length(setdiff(colnames(sig_meta), "ID"), 114L)
+  expect_true("Glycolysis" %in% colnames(sig_meta))
+  expect_true("Thromboxane_Biosynthesis" %in% colnames(sig_meta))
+  expect_false("T cells CD8" %in% colnames(sig_meta))
+  expect_false(anyNA(sig_meta$Thromboxane_Biosynthesis))
+  expect_equal(mean(sig_meta$Thromboxane_Biosynthesis), 0, tolerance = 1e-12)
+
+  gene_counts <- attr(sig_meta, "MurineMatchTx_pathway_gene_counts")
+  expect_identical(unname(gene_counts["Thromboxane_Biosynthesis"]), 1L)
 })
 
 test_that("plot_metabolism_heatmap requires explicit grouping and writes output", {
@@ -39,6 +48,8 @@ test_that("plot_metabolism_heatmap requires explicit grouping and writes output"
 
   expect_true(file.exists(file.path(output_dir, "heatmap.pdf")))
   expect_s4_class(heatmap_obj, "Heatmap")
+  expect_equal(rowMeans(heatmap_obj@matrix), c(Glycolysis = 0, OXPHOS = 0), tolerance = 1e-12)
+  expect_equal(apply(heatmap_obj@matrix, 1, stats::sd), c(Glycolysis = 1, OXPHOS = 1), tolerance = 1e-12)
 })
 
 test_that("GO symbol map lookup works for supported species", {

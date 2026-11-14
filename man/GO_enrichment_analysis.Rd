@@ -21,7 +21,7 @@ GO_enrichment_analysis(
 )
 }
 \arguments{
-\item{deg_file}{Character. Path to the edgeR DEG results file (.tsv or .csv).}
+\item{deg_file}{Character. Path to the DEG results file (.tsv or .csv).}
 
 \item{species}{Character. One of hsa, mmu, or rno.}
 

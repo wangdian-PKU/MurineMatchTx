@@ -60,6 +60,10 @@ and visualizes the immune cell composition in a stacked barplot.
 \item Input Data: Users can provide either a raw count matrix (input_type = "count") or TPM data (input_type = "TPM").
 \item Group Definition: Users must provide a valid 'group_as' vector matching the sample order.
 \item Visualization: Saves a PDF file showing the fraction of immune cell types across groups.
+\item Workflow: Pass the returned \code{eset_tpm} first to \code{plot_TME_boxplot()} and
+then to \code{calculate_metabolism_score()}; these functions independently
+consume the same TPM matrix. Pass the metabolism scores to
+\code{plot_metabolism_heatmap()}.
 \item Interpretation: When current human-reference deconvolution signatures are applied to mouse samples,
 results are exploratory, method-specific descriptions. They do not enter cross-species similarity
 scoring or model-selection decisions and do not establish cross-species validation without mouse-specific
@@ -84,4 +88,8 @@ TME_barplot_result <- plot_TME_barplot(
 eset_tpm <- TME_barplot_result$eset_tpm
 }
 
+}
+\seealso{
+\code{\link[=plot_TME_boxplot]{plot_TME_boxplot()}}, \code{\link[=calculate_metabolism_score]{calculate_metabolism_score()}},
+\code{\link[=plot_metabolism_heatmap]{plot_metabolism_heatmap()}}
 }

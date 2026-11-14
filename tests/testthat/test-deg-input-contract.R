@@ -35,6 +35,43 @@ test_that("edgeR, DESeq2, and limma fixtures normalize identically", {
   )
 })
 
+test_that("DESeq2 normalization ignores column order and unrelated columns", {
+  input <- data.frame(
+    padj = c(0.01, 0.02),
+    unrelated = c("a", "b"),
+    log2FoldChange = c(1.5, -1.5),
+    row.names = c("g1", "g2")
+  )
+
+  expect_equal(
+    MurineMatchTx:::.normalize_deg_input(input, deg_method = "DESeq2"),
+    data.frame(gene = c("g1", "g2"), logFC = c(1.5, -1.5), FDR = c(0.01, 0.02))
+  )
+})
+
+test_that("DEG heatmap selects the named change column", {
+  thresholds <- list(log2fc = 1, fdr = 0.05)
+  deg_data <- list(
+    processed_tcga = data.frame(logFC = c(1, -1), FDR = c(0.01, 0.02)),
+    processed_mouse = list(
+      ModelA = data.frame(FDR = c(0.01, 0.02), change = c(1, -1))
+    ),
+    tcga_gene_list = c("g1", "g2"),
+    deg_thresholds = thresholds
+  )
+  output_path <- paste0(tempfile("deg-heatmap-"), "/")
+  dir.create(output_path)
+
+  result <- plot_DEG_heatmap(
+    deg_data,
+    mouse_files = list(ModelA = "unused"),
+    color_palette = c("1" = "#ff7676", "-1" = "#66d4ff", "0.01" = "grey", "0.02" = "grey", "NA" = "white"),
+    output_path = output_path
+  )
+
+  expect_identical(as.numeric(result[, "ModelA"]), c(1, -1))
+})
+
 test_that("custom DEG columns require explicit mappings", {
   custom <- data.frame(
     symbol = c("g1", "g2"),

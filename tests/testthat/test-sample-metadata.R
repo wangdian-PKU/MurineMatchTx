@@ -194,6 +194,46 @@ test_that("TROM results are invariant to expression and metadata order", {
   )
 })
 
+test_that("TROM module matches a standalone TROM call", {
+  fixture <- make_expression_fixture()
+  human_ids <- fixture$metadata$sample_id[fixture$metadata$species == "human"]
+  mouse_ids <- fixture$metadata$sample_id[fixture$metadata$species == "mouse"]
+
+  result <- compute_similarity_matrix(
+    fixture$expression,
+    sample_metadata = fixture$metadata,
+    merge_clinic_CNV = fixture$clinic,
+    cnv_genes = character(),
+    clinical_vars = character()
+  )
+
+  human_data <- data.frame(
+    gene_id = rownames(fixture$expression),
+    fixture$expression[, human_ids, drop = FALSE],
+    check.names = FALSE
+  )
+  mouse_data <- data.frame(
+    gene_id = rownames(fixture$expression),
+    fixture$expression[, mouse_ids, drop = FALSE],
+    check.names = FALSE
+  )
+
+  standalone <- local({
+    old_directory <- setwd(tempdir())
+    on.exit(setwd(old_directory), add = TRUE)
+    suppressWarnings(TROM::ws.trom(
+      sp_gene_expr = human_data,
+      single = FALSE,
+      sp_gene_expr2 = mouse_data,
+      provide = FALSE,
+      save_overlap_genes = FALSE
+    ))
+  })
+  standalone <- as.matrix(standalone)[human_ids, mouse_ids, drop = FALSE]
+
+  expect_equal(result$similarity_matrix, standalone, tolerance = 0)
+})
+
 test_that("zero TCGA normals keeps tumor comparisons and omits empty normal branch", {
   fixture <- make_expression_fixture()
   keep <- c("TCGA-AA-0001-01", "TCGA-AA-0002-11", "mouse_normal", "mouse_tumor")

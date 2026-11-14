@@ -12,6 +12,10 @@
 #' - Input Data: Users can provide either a raw count matrix (input_type = "count") or TPM data (input_type = "TPM").
 #' - Group Definition: Users must provide a valid 'group_as' vector matching the sample order.
 #' - Visualization: Saves a PDF file showing the fraction of immune cell types across groups.
+#' - Workflow: Pass the returned `eset_tpm` first to `plot_TME_boxplot()` and
+#'   then to `calculate_metabolism_score()`; these functions independently
+#'   consume the same TPM matrix. Pass the metabolism scores to
+#'   `plot_metabolism_heatmap()`.
 #' - Interpretation: When current human-reference deconvolution signatures are applied to mouse samples,
 #'   results are exploratory, method-specific descriptions. They do not enter cross-species similarity
 #'   scoring or model-selection decisions and do not establish cross-species validation without mouse-specific
@@ -57,6 +61,9 @@
 #' # Extract TPM matrix for further analysis
 #' eset_tpm <- TME_barplot_result$eset_tpm
 #' }
+#'
+#' @seealso [plot_TME_boxplot()], [calculate_metabolism_score()],
+#'   [plot_metabolism_heatmap()]
 #'
 #' @export
 plot_TME_barplot <- function(data_matrix,

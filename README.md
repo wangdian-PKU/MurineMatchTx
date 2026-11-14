@@ -18,6 +18,22 @@ With the current human-reference signatures, TME and metabolism results provide 
 
 ![workflow](./figure/workflow.png)
 
+For the exploratory TME and metabolism branches, use the functions in this
+order:
+
+```r
+tme_result <- plot_TME_barplot(...)
+plot_TME_boxplot(tme_result$eset_tpm, ...)
+metabolism_scores <- calculate_metabolism_score(tme_result$eset_tpm, ...)
+plot_metabolism_heatmap(metabolism_scores, ...)
+```
+
+`plot_TME_boxplot()` and `calculate_metabolism_score()` independently consume
+the TPM matrix returned by `plot_TME_barplot()`. The TME branch describes
+immune-cell estimates, whereas the metabolism branch describes signature
+scores. Neither branch contributes to cross-species model ranking under the
+current human-reference signatures.
+
 ---
 
 ## 2. Installation

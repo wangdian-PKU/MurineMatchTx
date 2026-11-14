@@ -41,7 +41,7 @@
 #' @importFrom org.Mm.eg.db org.Mm.eg.db
 #' @importFrom org.Rn.eg.db org.Rn.eg.db
 #'
-#' @param deg_file Character. Path to the edgeR DEG results file (.tsv or .csv).
+#' @param deg_file Character. Path to the DEG results file (.tsv or .csv).
 #' @param species Character. One of hsa, mmu, or rno.
 #' @param org_db Character. The corresponding `OrgDb` annotation database (e.g., "org.Hs.eg.db").
 #' @param ont Character. Ontology type for GO enrichment ("BP", "MF", "CC"). Default is "BP".

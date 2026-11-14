@@ -1,6 +1,6 @@
 Package: MurineMatchTx
 Title: Cross-Species Transcriptomic Similarity Analysis
-Version: 0.99.0
+Version: 0.99.1
 Authors@R: 
     c(person(given = "Dian", 
             family = "Wang",  

@@ -6,8 +6,8 @@
 \usage{
 calculate_metabolism_score(
   eset_tpm,
-  method = "pca",
-  mini_gene_count = 2,
+  method = "relative_zscore",
+  mini_gene_count = 1,
   input_source = NULL
 )
 }
@@ -15,9 +15,13 @@ calculate_metabolism_score(
 \item{eset_tpm}{Data frame or matrix. TPM-transformed RNA-seq expression matrix,
 output from \code{plot_TME_barplot()}.}
 
-\item{method}{Character. Method for score calculation ("pca", "ssgsea", "zscore", "integration"). Default: "pca".}
+\item{method}{Character. Method for score calculation. The recommended
+default is \code{"relative_zscore"}; the original IOBR methods \code{"pca"},
+\code{"ssgsea"}, \code{"zscore"}, and \code{"integration"} remain available.}
 
-\item{mini_gene_count}{Integer. Minimum gene count required per signature. Default: 2.}
+\item{mini_gene_count}{Integer. Minimum number of available genes required
+per pathway. The default of 1 retains single-gene pathways. Pathways below
+the threshold are kept as \code{NA} rather than silently removed.}
 
 \item{input_source}{Character. Recorded TPM source: \code{"provided_tpm"} or
 \code{"count2tpm"}. Required for external TPM data without the trusted source
@@ -29,9 +33,17 @@ transformations as TPM data.}
 A data frame containing metabolism scores per sample.
 }
 \description{
-This function computes the metabolism-related gene signature score using different methods.
+This function computes scores for the complete IOBR metabolism signature
+collection. The recommended \code{"relative_zscore"} method standardizes each
+gene across samples within one dataset and then averages the standardized
+expression of the genes in each pathway. Run it separately for TCGA and for
+each mouse dataset before combining the returned score tables.
 }
 \details{
+This function and \code{plot_TME_boxplot()} independently consume the TPM matrix
+returned by \code{plot_TME_barplot()}. The metabolism scores, rather than the TME
+boxplots, are the input to \code{plot_metabolism_heatmap()}.
+
 When current human-reference metabolism signatures are applied to mouse samples, the
 resulting scores are exploratory, method-specific descriptions. They do not enter cross-species similarity
 scoring or model-selection decisions and do not establish cross-species validation without
@@ -39,8 +51,13 @@ mouse-specific signatures or orthogonal metabolic evidence.
 }
 \examples{
 \dontrun{
-sig_meta <- calculate_metabolism_score(eset_tpm, method = "pca", mini_gene_count = 2,
+sig_meta <- calculate_metabolism_score(eset_tpm, method = "relative_zscore",
+                                        mini_gene_count = 1,
                                         input_source = "provided_tpm")
 }
 
+}
+\seealso{
+\code{\link[=plot_TME_barplot]{plot_TME_barplot()}}, \code{\link[=plot_TME_boxplot]{plot_TME_boxplot()}},
+\code{\link[=plot_metabolism_heatmap]{plot_metabolism_heatmap()}}
 }

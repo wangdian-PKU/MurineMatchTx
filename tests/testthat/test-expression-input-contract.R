@@ -159,6 +159,65 @@ test_that("calculate_metabolism_score accepts TPM matrices from the TME workflow
   expect_identical(attr(sig_meta, "MurineMatchTx_tpm_source"), "count2tpm")
 })
 
+test_that("plot_TME_boxplot accepts TPM matrices from the TME workflow", {
+  eset_tpm <- matrix(
+    c(1, 2, 3, 4),
+    nrow = 2,
+    dimnames = list(c("GENE1", "GENE2"), c("s1", "s2"))
+  )
+  attr(eset_tpm, "MurineMatchTx_tpm_source") <- "count2tpm"
+  method_model <- data.frame(
+    ID = c("s1", "s2"),
+    macrophage_cell = c(0.25, 0.75),
+    check.names = FALSE
+  )
+
+  local_mocked_bindings(
+    deconvo_tme = function(eset, ...) {
+      expect_true(is.matrix(eset))
+      method_model
+    },
+    ggsave = function(...) invisible(NULL),
+    .package = "MurineMatchTx"
+  )
+
+  plots <- plot_TME_boxplot(
+    eset_tpm = eset_tpm,
+    group_as = c("model_normal", "model_tumor"),
+    condition_list = list(model = 2),
+    output_path = tempfile(pattern = "tme-boxplot-")
+  )
+
+  expect_type(plots, "list")
+  expect_named(plots, "macrophage_cell")
+})
+
+test_that("plot_TME_boxplot validates TPM values before deconvolution", {
+  eset_tpm <- matrix(
+    c(1, -2, 3, 4),
+    nrow = 2,
+    dimnames = list(c("GENE1", "GENE2"), c("s1", "s2"))
+  )
+  attr(eset_tpm, "MurineMatchTx_tpm_source") <- "count2tpm"
+
+  local_mocked_bindings(
+    deconvo_tme = function(...) {
+      stop("deconvolution should not run for invalid TPM")
+    },
+    .package = "MurineMatchTx"
+  )
+
+  expect_error(
+    plot_TME_boxplot(
+      eset_tpm = eset_tpm,
+      group_as = c("model_normal", "model_tumor"),
+      condition_list = list(model = 2),
+      output_path = tempfile(pattern = "tme-boxplot-")
+    ),
+    "non-negative"
+  )
+})
+
 test_that("input source extension preserves existing positional arguments", {
   expect_identical(
     names(formals(plot_TME_barplot))[1:4],

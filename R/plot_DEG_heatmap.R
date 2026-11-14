@@ -53,7 +53,7 @@ plot_DEG_heatmap <- function(deg_data,
   processed_mouse <- deg_data$processed_mouse
 
   # Merge mouse model data
-  merge_edger <- do.call(cbind, lapply(processed_mouse, function(x) x[, 1]))
+  merge_edger <- do.call(cbind, lapply(processed_mouse, function(x) x[["change"]]))
 
   # Ensure matrix formatting
   merge_edger <- as.matrix(merge_edger)

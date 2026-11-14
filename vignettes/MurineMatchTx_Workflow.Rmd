@@ -259,8 +259,12 @@ names(tme_inputs)
 deconvolution is deliberately outside this offline example: eight genes cannot
 support meaningful immune composition estimates. With suitable real data,
 `plot_TME_barplot()` returns `eset_tpm`, `method_model`, and `input_metadata`;
-`plot_TME_boxplot()` instead takes a TPM data frame, group labels, and a
-condition list, and runs CIBERSORT again. Neither deconvolution is run here.
+the user-facing order is `plot_TME_barplot()` -> `plot_TME_boxplot()` ->
+`calculate_metabolism_score()` -> `plot_metabolism_heatmap()`.
+`plot_TME_boxplot()` and `calculate_metabolism_score()` independently consume
+the TPM matrix returned by `plot_TME_barplot()`; the boxplot is not an input to
+metabolism scoring. The two branches address immune composition and metabolism
+signatures, respectively. Neither deconvolution is run here.
 
 When current human-reference deconvolution signatures are applied to mouse
 samples, TME results are exploratory, method-specific descriptions. They do not
@@ -291,14 +295,14 @@ go_contract
 
 # Offline metabolism scoring
 
-The local `zscore` path uses bundled signatures and does not run TME
-deconvolution. A one-gene minimum is used only to exercise the software on this
-tiny fixture; it is not a recommended analysis threshold. These synthetic
-scores have no metabolic interpretation.
+The default `relative_zscore` path uses the complete IOBR metabolism panel and
+does not run TME deconvolution. Each dataset must be scored separately before
+the returned score tables are combined. These synthetic fixture scores have no
+metabolic interpretation.
 
 ```{r metabolism}
 sig_meta <- calculate_metabolism_score(
-  provided_tpm, method = "zscore", mini_gene_count = 1,
+  provided_tpm, method = "relative_zscore", mini_gene_count = 1,
   input_source = "provided_tpm"
 )
 stopifnot(
