@@ -50,7 +50,15 @@ jobs:
           extra-packages: |
             any::pkgload
             any::digest
+            any::tinytex
             TROM@1.2
+      - name: Install Windows LaTeX manual font
+        if: runner.os == 'Windows'
+        shell: Rscript {0}
+        run: |
+          tinytex::tlmgr_install("courier")
+          font <- system2("kpsewhich", "pcrr8t.tfm", stdout = TRUE)
+          stopifnot(length(font) == 1L, nzchar(font))
       - name: Install package
         run: Rscript .github/scripts/ci.R install
       - name: Run testthat
