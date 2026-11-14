@@ -39,10 +39,6 @@ jobs:
           )
       - uses: r-lib/actions/setup-pandoc@v2
       - uses: r-lib/actions/setup-tinytex@v2
-      - name: Update TeX Live package manager
-        run: tlmgr update --self
-      - name: Install LaTeX manual dependencies
-        run: tlmgr install inconsolata texinfo
       - name: Install Linux system dependencies
         if: runner.os == 'Linux'
         run: |
