@@ -10,29 +10,9 @@ MurineMatchTx connects explicit sample metadata, standardized DEG inputs, audite
 
 Each module retains its own endpoint. DEG analysis evaluates tumor-versus-normal regulatory concordance, PCA diagnoses global structure and source effects, TROM measures sample-associated gene-set overlap, GO summarizes functional themes, and TME and metabolic modules describe signals derived from human reference signatures. Conflicting module results remain visible and are interpreted against the prespecified research question rather than combined into a universal score.
 
-### Scope of TME and metabolism results
-
-With the current human-reference signatures, TME and metabolism results provide exploratory, method-specific descriptions and remain separate from model-selection endpoints. Cross-species validation requires mouse-specific signatures or orthogonal immune or metabolic evidence.
-
 ### MurineMatchTx package workflow
 
 ![workflow](./figure/workflow.png)
-
-For the exploratory TME and metabolism branches, use the functions in this
-order:
-
-```r
-tme_result <- plot_TME_barplot(...)
-plot_TME_boxplot(tme_result$eset_tpm, ...)
-metabolism_scores <- calculate_metabolism_score(tme_result$eset_tpm, ...)
-plot_metabolism_heatmap(metabolism_scores, ...)
-```
-
-`plot_TME_boxplot()` and `calculate_metabolism_score()` independently consume
-the TPM matrix returned by `plot_TME_barplot()`. The TME branch describes
-immune-cell estimates, whereas the metabolism branch describes signature
-scores. Neither branch contributes to cross-species model ranking under the
-current human-reference signatures.
 
 ---
 
@@ -53,20 +33,6 @@ devtools::install_github("wangdian-PKU/MurineMatchTx")
 ## 3. User Manual
 
 Detailed guidance of how to use MurineMatchTx could be found in the https://wangdian-pku.github.io/MurineMatchTxManual/.
-
-### CI and analysis environments
-
-The Windows/Linux CI installs dependencies, runs testthat and the executable
-vignette, builds the source package, and checks that exact tarball with
-`R CMD check --as-cran`. Each run saves commands, logs, `sessionInfo()`, system
-information, installed package versions and check results as artifacts. TROM
-1.2 is selected from the CRAN archive because it is an archived dependency.
-The matrix follows the current R release; it is not a frozen analysis environment.
-macOS is deferred until the full dependency chain has a verified installation.
-
-The formal R540_2 analysis project's `renv.lock` belongs to that analysis project.
-Creating or updating it requires the stage 5 remote-environment authorization;
-this package repository does not create that lockfile or modify the server.
 
 ---
 
