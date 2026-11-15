@@ -26,6 +26,21 @@ test_that("calculate_metabolism_score returns the complete IOBR metabolism panel
   expect_identical(unname(gene_counts["Thromboxane_Biosynthesis"]), 1L)
 })
 
+test_that("metabolism signature loading suppresses connectivity probe warnings", {
+  loader_env <- new.env(parent = environment(MurineMatchTx:::.get_metabolism_signatures))
+  loader_env$getNamespaceExports <- function(package) "load_data"
+  loader_env$getExportedValue <- function(package, name) {
+    function(data_name) {
+      warning("URL 'https://www.baidu.com/': Timeout of 5 seconds was reached", call. = FALSE)
+      list(Glycolysis = c("HK1", "HK1", NA_character_))
+    }
+  }
+  get_signatures <- MurineMatchTx:::.get_metabolism_signatures
+  environment(get_signatures) <- loader_env
+
+  expect_no_warning(get_signatures())
+})
+
 test_that("plot_metabolism_heatmap requires explicit grouping and writes output", {
   sig_meta <- data.frame(
     ID = c("s1", "s2", "s3", "s4"),
