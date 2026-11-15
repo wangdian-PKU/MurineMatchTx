@@ -14,7 +14,8 @@ plot_TME_boxplot(
 )
 }
 \arguments{
-\item{eset_tpm}{Data frame. TPM-transformed RNA-seq expression matrix, output from 'plot_TME_barplot()'.}
+\item{eset_tpm}{Data frame or matrix. TPM-transformed RNA-seq expression matrix,
+output from \code{plot_TME_barplot()}.}
 
 \item{group_as}{Character vector. 'Identical' with the 'group_as' in 'plot_TME_barplot()'.}
 
@@ -33,11 +34,29 @@ Saves multiple boxplots and returns a list of ggplot objects.
 This function computes immune infiltration scores using CIBERSORT and generates
 boxplots for multiple immune signatures.
 }
+\details{
+This function and \code{calculate_metabolism_score()} are parallel consumers of the
+TPM matrix returned by \code{plot_TME_barplot()}. The TME boxplots do not supply
+input to metabolism scoring; the two branches address immune composition and
+metabolism signatures, respectively.
+
+When current human-reference deconvolution signatures are applied to mouse samples,
+these plots are exploratory, method-specific descriptions. They do not enter
+cross-species similarity scoring or model-selection decisions and do not establish
+cross-species validation without mouse-specific signatures or orthogonal immune evidence.
+}
 \examples{
 \dontrun{
 group_as <- c(rep("HBV_normal", 3), rep("HBV_tumor", 3), rep("DEN_normal", 4), rep("DEN_tumor", 4))
 condition_list <- list("HBV" = 6, "DEN" = 8)
-plot_TME_boxplot(eset_tpm = TME_barplot_result$eset_tpm, group_as = group_as, condition_list = condition_list)
+plot_TME_boxplot(
+  eset_tpm = TME_barplot_result$eset_tpm,
+  group_as = group_as, condition_list = condition_list
+)
 }
 
+}
+\seealso{
+\code{\link[=plot_TME_barplot]{plot_TME_barplot()}}, \code{\link[=calculate_metabolism_score]{calculate_metabolism_score()}},
+\code{\link[=plot_metabolism_heatmap]{plot_metabolism_heatmap()}}
 }

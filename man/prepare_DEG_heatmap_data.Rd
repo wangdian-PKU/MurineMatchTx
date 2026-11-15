@@ -10,65 +10,47 @@ prepare_DEG_heatmap_data(
   logFC = 1,
   FDR = 0.05,
   inTax = 9606,
-  outTax = 10090
+  outTax = 10090,
+  deg_method = "edgeR",
+  lfc_col = NULL,
+  padj_col = NULL,
+  gene_col = NULL,
+  deg_thresholds = NULL,
+  ortholog_map = NULL,
+  mapping_source = c("compara", "homologene")
 )
 }
 \arguments{
-\item{tcga_file}{Character. Path to the TCGA DEG file.}
+\item{tcga_file}{Path to the human DEG result file.}
 
-\item{mouse_files}{Named list of file paths for mouse model DEG files.}
+\item{mouse_files}{Named list of mouse DEG result files.}
 
-\item{logFC}{Numeric. Absolute logFC threshold used to filter significant TCGA genes. Default is 1.}
+\item{logFC, FDR}{Deprecated-compatible thresholds used only when
+\code{deg_thresholds} is \code{NULL}.}
 
-\item{FDR}{Numeric. FDR threshold used to filter significant TCGA genes. Default is 0.05.}
+\item{inTax, outTax}{Taxonomy IDs used only for the explicit HomoloGene
+compatibility path.}
 
-\item{inTax}{Numeric. Input taxonomy ID (default: 9606 for human).}
+\item{deg_method}{One of \code{"edgeR"}, \code{"DESeq2"}, \code{"limma"}, or \code{"custom"};
+may be a named vector by dataset.}
 
-\item{outTax}{Numeric. Output taxonomy ID (default: 10090 for mouse).}
+\item{lfc_col, padj_col, gene_col}{Optional explicit column names, scalar or
+named by dataset.}
+
+\item{deg_thresholds}{A list with \code{log2fc} and \code{fdr}.}
+
+\item{ortholog_map}{Standardized Compara mapping with stable and versioned
+human/mouse IDs, \code{homology_type}, \code{is_high_confidence}, and \code{release}.}
+
+\item{mapping_source}{\code{"compara"} for the primary audited mapping or
+\code{"homologene"} for an explicit compatibility/sensitivity analysis.}
 }
 \value{
-A list containing:
-\itemize{
-\item 'processed_tcga': Processed TCGA DEG matrix.
-\item 'processed_mouse': Named list of processed mouse DEG matrices.
-\item 'tcga_gene_list': List of homologous genes used in processing.
-}
+A list containing normalized human data, aligned mouse data, the
+human gene list, mapping audit, per-dataset gene-loss audit, retained
+mapping, and thresholds.
 }
 \description{
-This function selects significant DEGs from TCGA data, applies homologene conversion,
-and standardizes logFC values for visualization in a heatmap.
-}
-\details{
-This function preprocesses TCGA and mouse model DEG data by filtering significant genes,
-performing homologene conversion, and formatting logFC values.
-\itemize{
-\item Filters TCGA genes using user-configurable 'logFC' and 'FDR' thresholds.
-\item Performs homologene conversion to retain only mouse-human homologous genes.
-\item Formats logFC values:
-\itemize{
-\item '1' for TCGA high-expression genes.
-\item '-1' for TCGA low-expression genes.
-\item 'NA' for non-significant genes.
-}
-}
-}
-\examples{
-\dontrun{
-# Example usage
-tcga_path <- "./data/TCGA_DEG.tsv"
-mouse_files <- list(
-  "Our_Model" = "./data/Our_Model_DEG.tsv",
-  "GSE172629" = "./data/GSE172629_DEG.tsv"
-)
-
-# Run data processing
-processed_data <- prepare_DEG_heatmap_data(tcga_path, mouse_files, logFC = 0.5, FDR = 0.1)
-
-# View processed TCGA data
-head(processed_data$processed_tcga)
-
-# View processed mouse data
-head(processed_data$processed_mouse$Our_Model)
-}
-
+Normalize DEG inputs, apply one shared threshold object, and align human and
+mouse genes through an audited ortholog mapping.
 }

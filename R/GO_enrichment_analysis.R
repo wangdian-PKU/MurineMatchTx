@@ -11,17 +11,19 @@
 #' Gene Ontology (GO) Enrichment Analysis
 #'
 #' This function performs GO enrichment analysis (BP, MF, CC)
-#' for differentially expressed genes (DEGs) obtained from edgeR analysis.
+#' for normalized differential expression results.
 #'
 #' @description
-#' - Extracts significant DEGs (logFC > 1 & FDR < 0.05).
+#' - Extracts significant DEGs with the shared inclusive log2 fold-change and
+#'   exclusive adjusted-p thresholds.
 #' - Reads input data automatically from .tsv or .csv files.
 #' - Converts gene IDs based on the selected species (hsa, mmu, rno).
 #' - Supports user-defined ontology (BP, MF, CC).
 #' - Performs GO enrichment analysis and saves the plot to a PDF file.
 #'
 #' @details
-#' - Input Data: The function requires an edgeR DEG results file.
+#' - Input Data: The function accepts explicit edgeR, DESeq2, limma, or custom
+#'   DEG formats.
 #' - Supported File Formats: .tsv (tab-separated) and .csv (comma-separated).
 #' - Supported Species: hsa (human), mmu (mouse), rno (rat).
 #' - Ontology Options (ont):
@@ -39,7 +41,7 @@
 #' @importFrom org.Mm.eg.db org.Mm.eg.db
 #' @importFrom org.Rn.eg.db org.Rn.eg.db
 #'
-#' @param deg_file Character. Path to the edgeR DEG results file (.tsv or .csv).
+#' @param deg_file Character. Path to the DEG results file (.tsv or .csv).
 #' @param species Character. One of hsa, mmu, or rno.
 #' @param org_db Character. The corresponding `OrgDb` annotation database (e.g., "org.Hs.eg.db").
 #' @param ont Character. Ontology type for GO enrichment ("BP", "MF", "CC"). Default is "BP".
@@ -47,6 +49,11 @@
 #' @param width Integer. The width of PDF (default: 10.36).
 #' @param height Integer. The height of PDF (default: 6.35).
 #' @param output_path Character. Directory to save the PDF file (default: "./enrichment").
+#' @param deg_method One of `"edgeR"`, `"DESeq2"`, `"limma"`, or `"custom"`.
+#' @param lfc_col,padj_col,gene_col Optional explicit column names. Custom
+#'   inputs require `lfc_col` and `padj_col`.
+#' @param deg_thresholds A list with `log2fc` and `fdr` shared with the other
+#'   DEG modules.
 #'
 #' @return Saves the GO enrichment analysis plot as a .pdf file.
 #'
@@ -70,7 +77,12 @@ GO_enrichment_analysis <- function(deg_file,
                                    column_title,
                                    width = 10.36,
                                    height = 6.35,
-                                   output_path = "./enrichment") {
+                                   output_path = "./enrichment",
+                                   deg_method = "edgeR",
+                                   lfc_col = NULL,
+                                   padj_col = NULL,
+                                   gene_col = NULL,
+                                   deg_thresholds = NULL) {
   # Check if the "species" parameter is valid
   species_list <- c("hsa", "mmu", "rno")
   if (!species %in% species_list) {
@@ -82,34 +94,22 @@ GO_enrichment_analysis <- function(deg_file,
     stop("Error: `ont` must be one of 'BP', 'MF', or 'CC'.")
   }
 
-  # Automatically detect file format and read data
-  file_ext <- tolower(file_ext(deg_file)) # Extract file extension
-  if (file_ext == "tsv") {
-    deg_data <- read.table(deg_file, header = TRUE, row.names = 1, sep = "\t", stringsAsFactors = FALSE)
-  } else if (file_ext == "csv") {
-    deg_data <- read.csv(deg_file, header = TRUE, row.names = 1, stringsAsFactors = FALSE)
-  } else {
-    stop("Error: Unsupported file format. Please provide a .tsv or .csv file.")
-  }
-
-  # Ensure required columns are present
-  required_cols <- c("logFC", "FDR")
-  if (!all(required_cols %in% colnames(deg_data))) {
-    stop("Error: Input file must contain 'logFC' and 'FDR' columns.")
-  }
-
-  # Ensure row names are gene identifiers
-  if (is.null(rownames(deg_data)) || any(rownames(deg_data) == "")) {
-    stop("Error: The input file must have gene identifiers as row names.")
-  }
+  thresholds <- .validate_deg_thresholds(deg_thresholds)
+  deg_data <- .normalize_deg_file(
+    deg_file,
+    "DEG",
+    deg_method,
+    lfc_col,
+    padj_col,
+    gene_col
+  )
 
   # Load species-specific gene ID mapping
   EG2Symbol <- .get_symbol_map(species)
 
-  # Filter significant DEGs (logFC > 1 & FDR < 0.05)
-  geneLists <- deg_data %>%
-    filter(abs(logFC) > 1 & FDR < 0.05) %>%
-    mutate(symbol = rownames(.))
+  # Filter significant DEGs using the shared rule.
+  geneLists <- deg_data[.classify_deg(deg_data, thresholds) != "Stable", , drop = FALSE]
+  geneLists$symbol <- geneLists$gene
 
   # Convert gene IDs
   results <- merge(geneLists, EG2Symbol, by = "symbol", all.x = TRUE)

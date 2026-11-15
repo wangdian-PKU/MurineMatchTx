@@ -1,95 +1,57 @@
 #' Merge Differential Expression Gene (DEG) Datasets
 #'
-#' This function loads multiple DEG datasets (both human and mouse models),
-#' merges them into a single standardized format, and annotates each dataset
-#' with a group label for comparison.
+#' Read human and mouse DEG result files through one explicit input contract,
+#' classify genes with shared thresholds, and combine the normalized results.
 #'
-#' @description
-#' The function takes in:
-#' 1. A DEG result file from TCGA (human cancer dataset)
-#' 2. A list of DEG result files from various mouse cancer models (GEO data or user-provided data)
+#' @param human_file_path Path to the human DEG result file.
+#' @param mouse_files Named list of paths to mouse DEG result files.
+#' @param logFC_value Deprecated-compatible fold-change threshold used only when
+#'   `deg_thresholds` is `NULL`.
+#' @param FDR_value Deprecated-compatible adjusted-p threshold used only when
+#'   `deg_thresholds` is `NULL`.
+#' @param deg_method One of `"edgeR"`, `"DESeq2"`, `"limma"`, or `"custom"`.
+#'   A named character vector may specify a method for `TCGA` and each mouse
+#'   dataset separately.
+#' @param lfc_col,padj_col,gene_col Optional explicit column names. Each may be
+#'   scalar or named by dataset. Custom inputs require `lfc_col` and `padj_col`.
+#' @param deg_thresholds A list with `log2fc` and `fdr`. The classification rule
+#'   is `logFC >= log2fc` or `logFC <= -log2fc`, together with `FDR < fdr`.
 #'
-#' It merges all datasets into a single `merge.diff` dataframe with standardized
-#' column names and labels, making it suitable for visualization and further analysis.
+#' @return A data frame with `gene`, `logFC`, `FDR`, `contrast`, and `change`.
+#'   The validated thresholds are stored in the `deg_thresholds` attribute.
 #'
-#' @details
-#' - Supported file formats: .tsv (tab-separated) and .csv (comma-separated).
-#' - Required columns: 'gene', 'logFC', 'FDR'.
-#' - If a file format is not supported, an error message will be displayed.
-#' - DEG threshold: You can customize 'logFC' and 'FDR' thresholds (default: logFC > 1, FDR < 0.05).
-#'
-#' @importFrom dplyr mutate bind_rows case_when
-#' @importFrom tools file_ext
-#'
-#' @param human_file_path Character. Path to the TCGA human cancer DEG .tsv or .csv file.
-#' @param mouse_files Named list of file paths to mouse cancer model DEG .tsv or .csv files.
-#'                    Each element should be named according to the dataset source.
-#' @param logFC_value Numeric. Threshold for log2 fold change (default: 1).
-#' @param FDR_value Numeric. Threshold for adjusted p-value (default: 0.05).
-#'
-#' @return A merged data frame (`merge.diff`) with the following columns:
-#' \describe{
-#'   \item{gene}{Gene identifier}
-#'   \item{logFC}{Log fold change of gene expression}
-#'   \item{FDR}{False discovery rate (adjusted p-value)}
-#'   \item{contrast}{Dataset source (e.g., "TCGA", "Our", "GSE172629", etc.)}
-#'   \item{change}{Gene expression change status: "Up", "Down", or "Stable"}
-#' }
-#'
-#' @examples
-#' \dontrun{
-#' # Example file paths (replace with actual file paths)
-#' human_tcga_path <- "./data/TCGA_DEG.tsv"
-#' mouse_files <- list(
-#'   "Our_Model" = "./data/Our_Model_DEG.csv", # CSV format
-#'   "GSE172629" = "./data/GSE172629_DEG.tsv", # TSV format
-#'   "GSE208279" = "./data/GSE208279_DEG.tsv"
-#' )
-#'
-#' # Load and merge DEG data
-#' merged_data <- merge_DEG_datasets(human_tcga_path, mouse_files)
-#'
-#' # Display the first few rows
-#' head(merged_data)
-#' }
-#'
+#' @importFrom dplyr bind_rows
 #' @export
-merge_DEG_datasets <- function(human_file_path, mouse_files, logFC_value = 1, FDR_value = 0.05) {
-  # read files
-  read_deg_file <- function(file_path) {
-    file_ext <- tolower(file_ext(file_path))
-
-    if (file_ext == "tsv") {
-      data <- read.table(file_path, sep = "\t", header = TRUE, row.names = 1, check.names = FALSE, stringsAsFactors = FALSE)
-    } else if (file_ext == "csv") {
-      data <- read.csv(file_path, header = TRUE, row.names = 1, check.names = FALSE, stringsAsFactors = FALSE)
-    } else {
-      stop(paste("Error: Unsupported file format for", file_path, "Only .tsv and .csv files are allowed."))
-    }
-
-    return(data)
+merge_DEG_datasets <- function(human_file_path,
+                               mouse_files,
+                               logFC_value = 1,
+                               FDR_value = 0.05,
+                               deg_method = "edgeR",
+                               lfc_col = NULL,
+                               padj_col = NULL,
+                               gene_col = NULL,
+                               deg_thresholds = NULL) {
+  if (!is.list(mouse_files) || is.null(names(mouse_files)) || any(!nzchar(names(mouse_files)))) {
+    stop("'mouse_files' must be a named list.", call. = FALSE)
   }
+  thresholds <- .validate_deg_thresholds(deg_thresholds, logFC_value, FDR_value)
 
-  # read TCGA DEG data
-  tcga_data <- read_deg_file(human_file_path) %>%
-    mutate(contrast = "TCGA", gene = rownames(.))
+  human <- .normalize_deg_file(
+    human_file_path, "TCGA", deg_method, lfc_col, padj_col, gene_col
+  )
+  human$contrast <- "TCGA"
 
-  # read mouse_model DEG data
-  mouse_list <- lapply(names(mouse_files), function(name) {
-    read_deg_file(mouse_files[[name]]) %>%
-      mutate(contrast = name, gene = rownames(.))
+  mouse <- lapply(names(mouse_files), function(dataset) {
+    normalized <- .normalize_deg_file(
+      mouse_files[[dataset]], dataset, deg_method, lfc_col, padj_col, gene_col
+    )
+    normalized$contrast <- dataset
+    normalized
   })
 
-  # merge data
-  merge.diff <- bind_rows(tcga_data, bind_rows(mouse_list)) %>%
-    mutate(
-      change = case_when(
-        logFC > logFC_value & FDR < FDR_value ~ "Up",
-        logFC < -logFC_value & FDR < FDR_value ~ "Down",
-        TRUE ~ "Stable"
-      ),
-      contrast = factor(contrast, levels = c("TCGA", names(mouse_files)))
-    )
-
-  return(merge.diff)
+  merged <- dplyr::bind_rows(c(list(human), mouse))
+  merged$change <- .classify_deg(merged, thresholds)
+  merged$contrast <- factor(merged$contrast, levels = c("TCGA", names(mouse_files)))
+  attr(merged, "deg_thresholds") <- thresholds
+  merged
 }

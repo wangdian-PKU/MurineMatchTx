@@ -3,3 +3,10 @@
 ^LICENSE\.md$
 ^doc$
 ^Meta$
+^\.github$
+^\.superpowers$
+^check-results$
+^MurineMatchTx\.Rproj$
+^docs$
+^figure$
+^run_fastp_batch\.sh$

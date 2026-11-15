@@ -4,12 +4,13 @@
 \alias{plot_PCA_tinyarray}
 \title{PCA Plot Using 'tinyarray::draw_pca()'}
 \usage{
-plot_PCA_tinyarray(pca_data, batch_correction = TRUE, colors = NULL)
+plot_PCA_tinyarray(pca_data, batch_correction = FALSE, colors = NULL)
 }
 \arguments{
 \item{pca_data}{List. Output from 'prepare_PCA_data()', containing merged expression data.}
 
-\item{batch_correction}{Logical. Whether to use batch-corrected data (default: 'TRUE').}
+\item{batch_correction}{Logical. Whether to use batch-corrected data (default:
+\code{FALSE}).}
 
 \item{colors}{Character vector. Colors for different groups.}
 }
@@ -19,7 +20,7 @@ This function performs PCA analysis and visualizes the results using 'tinyarray:
 \examples{
 \dontrun{
 # draw PCA
-plot_PCA_tinyarray(pca_data = pca_data, batch_correction = T)
+plot_PCA_tinyarray(pca_data = pca_data)
 }
 
 }

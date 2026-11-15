@@ -25,6 +25,8 @@
 #' @param width Integer. The width of ggplot_draw (default: 8).
 #' @param height Integer. The height of ggplot_draw (default: 4).
 #' @param output_path Character. File path for saving the plot (default: "./DEG/").
+#' @param deg_thresholds Shared DEG threshold object. By default it is read from
+#'   the `heatmap_data` attribute.
 #'
 #' @return A 'ggplot' object representing the barplot visualization.
 #'
@@ -40,10 +42,19 @@ plot_DEG_barplot <- function(heatmap_data,
                              colors = list(up = "#ff7676", down = "#66d4ff"),
                              width = 8,
                              height = 4,
-                             output_path = "./DEG/") {
+                             output_path = "./DEG/",
+                             deg_thresholds = NULL) {
   # Ensure input data is a matrix from `plot_DEG_heatmap()`
   if (!is.matrix(heatmap_data)) {
     stop("Error: 'heatmap_data' must be a matrix from 'plot_DEG_heatmap()'.")
+  }
+  embedded_thresholds <- attr(heatmap_data, "deg_thresholds")
+  thresholds <- .validate_deg_thresholds(
+    if (is.null(deg_thresholds)) embedded_thresholds else deg_thresholds
+  )
+  if (!is.null(deg_thresholds) && !is.null(embedded_thresholds) &&
+      !identical(thresholds, .validate_deg_thresholds(embedded_thresholds))) {
+    stop("'deg_thresholds' do not match the thresholds used to prepare the heatmap.", call. = FALSE)
   }
 
   # Transform data format
@@ -70,6 +81,6 @@ plot_DEG_barplot <- function(heatmap_data,
   ggsave(file_ext, plot = p, width = width, height = height)
   message("Barplot saved to: ", file_ext)
 
-
+  attr(p, "deg_thresholds") <- thresholds
   return(p)
 }

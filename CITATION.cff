@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata below."
+title: "MurineMatchTx: Cross-Species Transcriptomic Similarity Analysis"
+type: software
+authors:
+  - family-names: "Wang"
+    given-names: "Dian"
+  - family-names: "Guan"
+    given-names: "Guiwen"
+version: "0.99.1"
+date-released: "2026-11-14"
+repository-code: "https://github.com/wangdian-PKU/MurineMatchTx"

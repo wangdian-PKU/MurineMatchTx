@@ -8,7 +8,8 @@ plot_metabolism_heatmap(
   sig_meta,
   group_as,
   output_path = "./metabolism",
-  clustering_method = "manhattan",
+  clustering_method = "pearson",
+  scale_rows = TRUE,
   width = 10,
   height = 22,
   row_name_width = 7,
@@ -23,7 +24,12 @@ plot_metabolism_heatmap(
 
 \item{output_path}{Character. File path to save the heatmap (default: "./metabolism/").}
 
-\item{clustering_method}{Character. Clustering method ("manhattan", "canberra"). Default: "manhattan".}
+\item{clustering_method}{Character. Clustering distance (\code{"pearson"},
+\code{"manhattan"}, or \code{"canberra"}). The default \code{"pearson"} clusters groups
+by their pathway patterns rather than absolute score magnitude.}
+
+\item{scale_rows}{Logical. If \code{TRUE} (default), standardize each pathway
+across the displayed groups before clustering and plotting.}
 
 \item{width}{Numeric. Width of the output PDF (default: 10).}
 
@@ -40,4 +46,14 @@ Saves the heatmap and returns the heatmap object.
 }
 \description{
 This function generates a heatmap of metabolism-related signature scores.
+}
+\details{
+When current human-reference metabolism signatures are applied to mouse samples, this
+heatmap is an exploratory, method-specific description. It does not enter cross-species similarity scoring
+or model-selection decisions and does not establish cross-species validation without
+mouse-specific signatures or orthogonal metabolic evidence.
+}
+\seealso{
+\code{\link[=plot_TME_barplot]{plot_TME_barplot()}}, \code{\link[=plot_TME_boxplot]{plot_TME_boxplot()}},
+\code{\link[=calculate_metabolism_score]{calculate_metabolism_score()}}
 }

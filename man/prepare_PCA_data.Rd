@@ -7,63 +7,33 @@
 prepare_PCA_data(
   tcga_file,
   mouse_files,
-  sample_counts,
-  batch_correction = TRUE
+  sample_counts = NULL,
+  batch_correction = FALSE,
+  sample_metadata = NULL
 )
 }
 \arguments{
-\item{tcga_file}{Character. Path to TCGA expression data file.}
+\item{tcga_file}{Path to the human expression file.}
 
-\item{mouse_files}{Named list of file paths for mouse model expression data.}
+\item{mouse_files}{Named list of mouse expression files.}
 
-\item{sample_counts}{Named list specifying the number of normal and tumor samples for each dataset.
-Each dataset must have a 'normal' and 'tumor' entry, e.g.,
-'list("TCGA" = c(normal = 50, tumor = 374), "Our_Model" = c(normal = 3, tumor = 2))'}
+\item{sample_counts}{Deprecated-compatible named count list. It is used only
+when \code{sample_metadata} is \code{NULL}.}
 
-\item{batch_correction}{Logical. Whether to apply batch correction (default: 'TRUE').}
+\item{batch_correction}{Whether to apply \code{sva::ComBat}. Defaults to \code{FALSE}
+so PCA reflects the uncorrected expression structure.}
+
+\item{sample_metadata}{Data frame containing at least \code{sample_id}, \code{species},
+\code{dataset}, \code{model}, and \code{tissue}. Optional columns such as \code{batch},
+\code{pair_id}, and \code{subtype} are retained.}
 }
 \value{
-A list containing:
-\describe{
-\item{merged_data}{Merged expression matrix (genes × samples).}
-\item{group_all}{Sample group labels (normal/tumor for each dataset).}
-\item{batch}{Batch assignment for each sample (dataset source).}
-\item{corrected_data}{Batch-corrected expression matrix (if 'batch_correction = TRUE').}
-}
+A list containing the uncorrected merged matrix, sample labels, batch
+labels, an optional corrected matrix, parameter settings, and metadata in
+matrix-column order.
 }
 \description{
-\itemize{
-\item Reads expression data from TCGA and multiple mouse cancer models.
-\item Ensures gene expression data are standardized and merged based on homologous genes.
-\item Allows optional batch correction using 'ComBat'.
-}
-}
-\details{
-This function processes gene expression data from TCGA and multiple mouse models
-to generate a merged expression matrix suitable for PCA analysis.
-\itemize{
-\item Uses gene names as row identifiers to merge datasets.
-\item Sample grouping ('group_all') and batch effects ('batch') are dynamically assigned.
-\item If 'batch_correction = TRUE', batch correction is applied using 'ComBat'.
-}
-}
-\examples{
-\dontrun{
-mouse_files <- list(
-  "Our_Model" = "./data/Our_Model.homo.csv",
-  "GSE172629" = "./data/GSE172629.homo.tsv"
-)
-sample_counts <- list(
-  "TCGA" = c(normal = 50, tumor = 374),
-  "Our_Model" = c(normal = 3, tumor = 2),
-  "GSE172629" = c(normal = 3, tumor = 3)
-)
-pca_data <- prepare_PCA_data(
-  tcga_file = "./data/TCGA.tsv",
-  mouse_files = mouse_files,
-  sample_counts = sample_counts,
-  batch_correction = TRUE
-)
-}
-
+Merge expression files by gene and join sample annotations by \code{sample_id}.
+Sample labels are never inferred from column positions when
+\code{sample_metadata} is supplied.
 }

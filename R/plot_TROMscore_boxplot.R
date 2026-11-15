@@ -45,7 +45,7 @@ plot_TROMscore_boxplot <- function(merge_long,
     scale_color_manual(name = "", values = c("#5aadd0", "#af7aa1")) +
     scale_fill_manual(name = "", values = c("#5aadd0", "#af7aa1")) +
     xlab("") +
-    ylab("Similarity score (TROM)") +
+    ylab("Mean TROM score") +
     geom_vline(xintercept = 2.6, alpha = 0.5, color = "grey") +
     scale_y_continuous(expand = c(0, 0)) +
     theme_classic() +

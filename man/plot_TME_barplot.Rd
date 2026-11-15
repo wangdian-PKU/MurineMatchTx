@@ -11,13 +11,15 @@ plot_TME_barplot(
   group_as,
   output_path = "./TME",
   height = 5.2,
-  width = 10
+  width = 10,
+  input_source = NULL
 )
 }
 \arguments{
 \item{data_matrix}{Data frame. 'Raw' count matrix or 'TPM' data (genes × samples).}
 
-\item{input_type}{Character. "count" (convert count to TPM) or "TPM" (use TPM directly). Default is "count".}
+\item{input_type}{Character. User-declared input type: "count" (convert
+count to TPM) or "TPM" (use TPM directly). Default is "count".}
 
 \item{method}{Character. The immune infiltration method ("cibersort", "mcpcounter", "xcell", "quantiseq").}
 
@@ -28,12 +30,19 @@ plot_TME_barplot(
 \item{height}{Numeric. Height of the output PDF (default: 5.2).}
 
 \item{width}{Numeric. Width of the output PDF (default: 10).}
+
+\item{input_source}{Character. Recorded source of the supplied matrix: \code{"raw_count"},
+\code{"provided_tpm"}, \code{"count2tpm"}, or \code{"combat_corrected"}. Required for
+external matrices without a trusted \code{MurineMatchTx_tpm_source} attribute.
+ComBat-corrected input is rejected. This 0.99.0 pre-release contract avoids
+treating unlabelled external transformations as raw count or TPM data.}
 }
 \value{
 A list containing:
 \itemize{
 \item eset_tpm: The TPM-transformed expression matrix.
 \item method_model: Immune infiltration results.
+\item input_metadata: The declared input type, input source, and TPM source.
 \item A stacked barplot PDF file: Saved at 'output_path', showing immune cell fractions per group.
 }
 }
@@ -51,18 +60,36 @@ and visualizes the immune cell composition in a stacked barplot.
 \item Input Data: Users can provide either a raw count matrix (input_type = "count") or TPM data (input_type = "TPM").
 \item Group Definition: Users must provide a valid 'group_as' vector matching the sample order.
 \item Visualization: Saves a PDF file showing the fraction of immune cell types across groups.
+\item Workflow: Pass the returned \code{eset_tpm} first to \code{plot_TME_boxplot()} and
+then to \code{calculate_metabolism_score()}; these functions independently
+consume the same TPM matrix. Pass the metabolism scores to
+\code{plot_metabolism_heatmap()}.
+\item Interpretation: When current human-reference deconvolution signatures are applied to mouse samples,
+results are exploratory, method-specific descriptions. They do not enter cross-species similarity
+scoring or model-selection decisions and do not establish cross-species validation without mouse-specific
+signatures or orthogonal immune evidence.
 }
 }
 \examples{
 \dontrun{
 # Example usage (using raw count matrix)
-group_as <- c(rep("TCGA_normal", 50), rep("TCGA_tumor", 374), rep("HBV Pten KO_normal", 3), rep("HBV Pten KO_tumor", 3))
+group_as <- c(
+  rep("TCGA_normal", 50), rep("TCGA_tumor", 374),
+  rep("HBV Pten KO_normal", 3), rep("HBV Pten KO_tumor", 3)
+)
 
 # TME barplot
-TME_barplot_result <- plot_TME_barplot(data_matrix = merge.data, input_type = "count", method = "cibersort", group_as = group_as)
+TME_barplot_result <- plot_TME_barplot(
+  data_matrix = merge.data, input_type = "count", input_source = "raw_count",
+  method = "cibersort", group_as = group_as
+)
 
 # Extract TPM matrix for further analysis
 eset_tpm <- TME_barplot_result$eset_tpm
 }
 
+}
+\seealso{
+\code{\link[=plot_TME_boxplot]{plot_TME_boxplot()}}, \code{\link[=calculate_metabolism_score]{calculate_metabolism_score()}},
+\code{\link[=plot_metabolism_heatmap]{plot_metabolism_heatmap()}}
 }

@@ -16,7 +16,8 @@ plot_DEG_volcano(
   legend_position = "right",
   width = 10,
   height = 6,
-  output_path = "./DEG/"
+  output_path = "./DEG/",
+  deg_thresholds = NULL
 )
 }
 \arguments{
@@ -45,6 +46,9 @@ Default: list(Up = "#e6550d", Down = "#3182bd", Stable = "#636363").}
 \item{height}{Integer. The height of ggplot_draw (default: 6).}
 
 \item{output_path}{Character. File path for saving the plot (default: "./DEG/").}
+
+\item{deg_thresholds}{Shared DEG threshold object. By default it is read from
+the \code{deg_data} attribute and controls the horizontal reference lines.}
 }
 \value{
 A 'ggplot' object representing the volcano plot.

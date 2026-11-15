@@ -13,7 +13,8 @@ plot_DEG_heatmap(
   color_palette = c(`1` = "#ff7676", `-1` = "#66d4ff", `NA` = "white"),
   width = 7.9,
   height = 5.95,
-  output_path = "./DEG/"
+  output_path = "./DEG/",
+  deg_thresholds = NULL
 )
 }
 \arguments{
@@ -34,6 +35,9 @@ plot_DEG_heatmap(
 \item{height}{Integer. The height of pdf (default: 5.95).}
 
 \item{output_path}{Character. File path for saving the plot (default: "./DEG/").}
+
+\item{deg_thresholds}{Shared DEG threshold object. By default it is read from
+\code{deg_data$deg_thresholds} and propagated to the returned matrix.}
 }
 \value{
 A matrix ('merge_edger') containing merged DEG expression data as the input object of 'plot_DEG_barplot()'

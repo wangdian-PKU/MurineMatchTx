@@ -1,8 +1,18 @@
-# Curated metabolism related signatures used by calculate_metabolism_score().
-# This object is internal to the package and intentionally not exported.
-signature_metabolism <- list(
-  Glycolysis = c("HK1", "HK2", "PFKM", "ALDOA", "ENO1", "PKM", "LDHA"),
-  Oxidative_Phosphorylation = c("NDUFA1", "NDUFB8", "UQCRC1", "COX4I1", "ATP5F1A", "ATP5F1B"),
-  TCA_Cycle = c("CS", "ACO2", "IDH3A", "OGDH", "SUCLG1", "SDHA", "FH", "MDH2"),
-  Lipid_Metabolism = c("FASN", "ACACA", "SCD", "CPT1A", "ACOX1", "HMGCR")
-)
+# Load the complete metabolism signature collection distributed with IOBR.
+.get_metabolism_signatures <- function() {
+  if ("load_data" %in% getNamespaceExports("IOBR")) {
+    signatures <- suppressWarnings(
+      getExportedValue("IOBR", "load_data")("signature_metabolism")
+    )
+  } else {
+    data_env <- new.env(parent = emptyenv())
+    utils::data("signature_metabolism", package = "IOBR", envir = data_env)
+    signatures <- data_env$signature_metabolism
+  }
+
+  if (!is.list(signatures) || length(signatures) == 0L) {
+    stop("Error: the IOBR metabolism signature collection could not be loaded.")
+  }
+
+  lapply(signatures, function(genes) unique(stats::na.omit(as.character(genes))))
+}

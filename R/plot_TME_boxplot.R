@@ -3,7 +3,18 @@
 #' This function computes immune infiltration scores using CIBERSORT and generates
 #' boxplots for multiple immune signatures.
 #'
-#' @param eset_tpm Data frame. TPM-transformed RNA-seq expression matrix, output from 'plot_TME_barplot()'.
+#' This function and `calculate_metabolism_score()` are parallel consumers of the
+#' TPM matrix returned by `plot_TME_barplot()`. The TME boxplots do not supply
+#' input to metabolism scoring; the two branches address immune composition and
+#' metabolism signatures, respectively.
+#'
+#' When current human-reference deconvolution signatures are applied to mouse samples,
+#' these plots are exploratory, method-specific descriptions. They do not enter
+#' cross-species similarity scoring or model-selection decisions and do not establish
+#' cross-species validation without mouse-specific signatures or orthogonal immune evidence.
+#'
+#' @param eset_tpm Data frame or matrix. TPM-transformed RNA-seq expression matrix,
+#'   output from `plot_TME_barplot()`.
 #' @param group_as Character vector. 'Identical' with the 'group_as' in 'plot_TME_barplot()'.
 #' @param condition_list Named list. Sample count for each mouse model (e.g., 'list("DEN" = 6, "GSExxx" = 8)').
 #' @param width Integer. Width of saved plots (default: 10).
@@ -21,8 +32,14 @@
 #' \dontrun{
 #' group_as <- c(rep("HBV_normal", 3), rep("HBV_tumor", 3), rep("DEN_normal", 4), rep("DEN_tumor", 4))
 #' condition_list <- list("HBV" = 6, "DEN" = 8)
-#' plot_TME_boxplot(eset_tpm = TME_barplot_result$eset_tpm, group_as = group_as, condition_list = condition_list)
+#' plot_TME_boxplot(
+#'   eset_tpm = TME_barplot_result$eset_tpm,
+#'   group_as = group_as, condition_list = condition_list
+#' )
 #' }
+#'
+#' @seealso [plot_TME_barplot()], [calculate_metabolism_score()],
+#'   [plot_metabolism_heatmap()]
 #'
 #' @export
 plot_TME_boxplot <- function(eset_tpm,
@@ -32,7 +49,10 @@ plot_TME_boxplot <- function(eset_tpm,
                              height = 6,
                              output_path = "./TME_boxplots") {
   # Step 1: Validate Inputs
-  if (!is.data.frame(eset_tpm)) stop("Error: 'eset_tpm' must be a data frame.")
+  if (!is.data.frame(eset_tpm) && !is.matrix(eset_tpm)) {
+    stop("Error: 'eset_tpm' must be a data frame or matrix.")
+  }
+  .validate_expression_input(eset_tpm, input_type = "TPM")
   if (length(group_as) != ncol(eset_tpm)) stop("Error: 'group_as' length must match number of samples (columns in 'eset_tpm').")
 
   # Step 2: Compute Immune Cell Fractions

@@ -24,6 +24,8 @@
 #' @param width Integer. The width of ggplot_draw (default: 10).
 #' @param height Integer. The height of ggplot_draw (default: 6).
 #' @param output_path Character. File path for saving the plot (default: "./DEG/").
+#' @param deg_thresholds Shared DEG threshold object. By default it is read from
+#'   the `deg_data` attribute and controls the horizontal reference lines.
 #'
 #' @importFrom ggplot2 ggplot geom_point aes geom_hline scale_color_manual scale_alpha labs theme_bw theme element_text ggsave
 #'
@@ -56,7 +58,16 @@ plot_DEG_volcano <- function(deg_data,
                              legend_position = "right",
                              width = 10,
                              height = 6,
-                             output_path = "./DEG/") {
+                             output_path = "./DEG/",
+                             deg_thresholds = NULL) {
+  embedded_thresholds <- attr(deg_data, "deg_thresholds")
+  thresholds <- .validate_deg_thresholds(
+    if (is.null(deg_thresholds)) embedded_thresholds else deg_thresholds
+  )
+  if (!is.null(deg_thresholds) && !is.null(embedded_thresholds) &&
+      !identical(thresholds, .validate_deg_thresholds(embedded_thresholds))) {
+    stop("'deg_thresholds' do not match the thresholds used to classify DEG data.", call. = FALSE)
+  }
   # Ensure directory exists
   dir.create(dirname(output_path), showWarnings = FALSE, recursive = TRUE)
 
@@ -65,7 +76,7 @@ plot_DEG_volcano <- function(deg_data,
     geom_point(aes(x = contrast, y = logFC, color = change, size = -log10(FDR), alpha = -log10(FDR)),
       position = "jitter"
     ) +
-    geom_hline(yintercept = c(-1, 1), linetype = "dotdash", color = "grey30") +
+    geom_hline(yintercept = c(-thresholds$log2fc, thresholds$log2fc), linetype = "dotdash", color = "grey30") +
     scale_color_manual(values = colors) +
     scale_alpha(range = alpha_range) +
     labs(title = title, x = xlab, y = ylab) +
@@ -81,5 +92,6 @@ plot_DEG_volcano <- function(deg_data,
   ggsave(file_ext, plot = p, width = width, height = height)
   message("Volcano plot saved to: ", file_ext)
 
+  attr(p, "deg_thresholds") <- thresholds
   return(p)
 }

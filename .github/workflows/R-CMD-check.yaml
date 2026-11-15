@@ -1,0 +1,76 @@
+name: R-CMD-check
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    env:
+      R_KEEP_PKG_SOURCE: yes
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: 'release'
+          use-public-rspm: true
+      - name: Configure CI results directory
+        shell: Rscript {0}
+        run: |
+          results <- file.path(
+            normalizePath(Sys.getenv("RUNNER_TEMP"), winslash = "/", mustWork = TRUE),
+            "check-results"
+          )
+          cat(
+            paste0("CHECK_RESULTS_DIR=", results, "\n"),
+            file = Sys.getenv("GITHUB_ENV"),
+            append = TRUE
+          )
+      - uses: r-lib/actions/setup-pandoc@v2
+      - uses: r-lib/actions/setup-tinytex@v2
+        if: runner.os == 'Linux'
+      - name: Install Linux system dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libcurl4-openssl-dev libssl-dev libxml2-dev libglpk-dev libgsl-dev libfontconfig1-dev libfreetype6-dev libharfbuzz-dev libfribidi-dev libpng-dev libtiff-dev libjpeg-dev libmagick++-dev libgit2-dev ghostscript qpdf
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          dependencies: '"all"'
+          extra-packages: |
+            any::pkgload
+            any::digest
+            TROM@1.2
+      - name: Install package
+        run: Rscript .github/scripts/ci.R install
+      - name: Run testthat
+        run: Rscript .github/scripts/ci.R test
+      - name: Execute vignette
+        run: Rscript .github/scripts/ci.R vignette
+      - name: Build source package with vignettes
+        run: Rscript .github/scripts/ci.R build
+      - name: Check exact source package as CRAN
+        env:
+          CHECK_NO_MANUAL: ${{ runner.os == 'Windows' }}
+        run: Rscript .github/scripts/ci.R check
+      - name: Record environment
+        if: always()
+        run: Rscript .github/scripts/ci.R environment
+      - name: Upload verification evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: R-check-${{ matrix.os }}
+          path: ${{ runner.temp }}/check-results/
+          if-no-files-found: error

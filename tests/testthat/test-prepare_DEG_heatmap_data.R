@@ -25,8 +25,25 @@ test_that("prepare_DEG_heatmap_data applies custom TCGA thresholds", {
 
   mouse_files <- list(ModelA = mouse_a_file, ModelB = mouse_b_file)
 
-  default_result <- prepare_DEG_heatmap_data(tcga_file, mouse_files)
-  custom_result <- prepare_DEG_heatmap_data(tcga_file, mouse_files, logFC = 0.5, FDR = 0.05)
+  ortholog_map <- data.frame(
+    human_gene_id = c("TP53", "EGFR"),
+    mouse_gene_id = c("TP53", "EGFR"),
+    human_gene_id_version = c("TP53", "EGFR"),
+    mouse_gene_id_version = c("TP53", "EGFR"),
+    homology_type = "ortholog_one2one",
+    is_high_confidence = TRUE,
+    release = 116,
+    stringsAsFactors = FALSE
+  )
+
+  default_result <- prepare_DEG_heatmap_data(tcga_file, mouse_files, ortholog_map = ortholog_map)
+  custom_result <- prepare_DEG_heatmap_data(
+    tcga_file,
+    mouse_files,
+    logFC = 0.5,
+    FDR = 0.05,
+    ortholog_map = ortholog_map
+  )
 
   expect_equal(nrow(default_result$processed_tcga), 1)
   expect_equal(nrow(custom_result$processed_tcga), 2)
@@ -49,13 +66,24 @@ test_that("prepare_DEG_heatmap_data validates threshold inputs", {
 
   mouse_files <- list(ModelA = mouse_file)
 
-  expect_error(
-    prepare_DEG_heatmap_data(tcga_file, mouse_files, logFC = -1),
-    "must be a single non-negative number"
+  ortholog_map <- data.frame(
+    human_gene_id = c("TP53", "EGFR"),
+    mouse_gene_id = c("TP53", "EGFR"),
+    human_gene_id_version = c("TP53", "EGFR"),
+    mouse_gene_id_version = c("TP53", "EGFR"),
+    homology_type = "ortholog_one2one",
+    is_high_confidence = TRUE,
+    release = 116,
+    stringsAsFactors = FALSE
   )
 
   expect_error(
-    prepare_DEG_heatmap_data(tcga_file, mouse_files, FDR = 2),
-    "must be a single number between 0 and 1"
+    prepare_DEG_heatmap_data(tcga_file, mouse_files, logFC = -1, ortholog_map = ortholog_map),
+    "non-negative"
+  )
+
+  expect_error(
+    prepare_DEG_heatmap_data(tcga_file, mouse_files, FDR = 2, ortholog_map = ortholog_map),
+    "between 0 and 1"
   )
 })

@@ -2,84 +2,51 @@
 % Please edit documentation in R/plot_TROMscore_heatmap.R
 \name{plot_TROMscore_heatmap}
 \alias{plot_TROMscore_heatmap}
-\title{Plot TROM Score Heatmap for TCGA and Mouse Models}
+\title{Plot TROM Score Heatmap for Human and Mouse Samples}
 \usage{
 plot_TROMscore_heatmap(
   dm_trom_del_backgroud_clinic,
   trom_matrix,
-  tcga_sample_size,
-  tcga_normal_count,
-  model_group_count,
-  condition,
-  clinical_vars,
-  cnv_genes,
-  group_all,
+  tcga_sample_size = NULL,
+  tcga_normal_count = NULL,
+  model_group_count = NULL,
+  condition = NULL,
+  clinical_vars = character(),
+  cnv_genes = character(),
+  group_all = NULL,
   width = 11.84,
   height = 7.11,
   output_path = "./similarity/TROM_heatmap.pdf",
   cluster_rows = FALSE,
-  cluster_cols = FALSE
+  cluster_cols = FALSE,
+  sample_metadata = NULL
 )
 }
 \arguments{
-\item{dm_trom_del_backgroud_clinic}{Data frame. Output from 'compute_similarity_matrix()', containing 'TROM scores'.}
+\item{dm_trom_del_backgroud_clinic}{Annotated table returned by
+\code{\link[=compute_similarity_matrix]{compute_similarity_matrix()}}.}
 
-\item{trom_matrix}{Data frame. 'Raw ws.trom similarity matrix' before background removal.Output from 'compute_similarity_matrix()'.}
+\item{trom_matrix}{Raw TROM matrix returned by \code{\link[=compute_similarity_matrix]{compute_similarity_matrix()}}.}
 
-\item{tcga_sample_size}{Integer. Total number of TCGA samples.}
+\item{tcga_sample_size, tcga_normal_count, model_group_count, condition, group_all}{Deprecated-compatible positional inputs used only when \code{sample_metadata}
+is \code{NULL}.}
 
-\item{tcga_normal_count}{Integer. Number of TCGA normal samples.}
+\item{clinical_vars, cnv_genes}{Annotation columns to display.}
 
-\item{model_group_count}{Integer. Total number of Mouse model samples.}
+\item{width, height}{PDF dimensions.}
 
-\item{condition}{Named list. User-defined sample counts per mouse model condition (e.g., 'list("HBV pten p53 ko" = 5, "DEN Cl4" = 21)').}
+\item{output_path}{Output PDF path.}
 
-\item{clinical_vars}{Character vector. Clinical variables used in 'prepare_dm_trom_del_backgroud_clinic()'.}
+\item{cluster_rows, cluster_cols}{Whether to cluster heatmap rows or columns.}
 
-\item{cnv_genes}{Character vector. Copy number variation (CNV) genes used in 'prepare_dm_trom_del_backgroud_clinic()'.}
-
-\item{group_all}{The group information of TCGA and all mouse models from 'prepare_PCA_data()'.}
-
-\item{width}{Integer. The width of PDF (default: 11.84).}
-
-\item{height}{Integer. The height of PDF (default: 7.11).}
-
-\item{output_path}{Character. File path for saving the heatmap (default: "./similarity/TROM_heatmap.pdf").}
-
-\item{cluster_rows}{Logical. Whether to cluster rows (default: 'FALSE').}
-
-\item{cluster_cols}{Logical. Whether to cluster columns (default: 'FALSE').}
+\item{sample_metadata}{Explicit sample metadata shared with PCA and TROM.}
 }
 \value{
-A list containing:
-\describe{
-\item{heatmap_obj}{The generated heatmap.}
-\item{merge_long}{Processed similarity scores for downstream analysis.}
-}
+A list containing the heatmap, model-level long data, and the exact
+matrix displayed.
 }
 \description{
-This function visualizes transcriptional similarity scores between TCGA samples and mouse models.
-}
-\details{
-\itemize{
-\item Returns 'heatmap_obj' (heatmap plot) and 'merge_long' (processed similarity scores).
-\item 'merge_long' is used as the input for 'plot_TROMscore_boxplot()'.
-}
-}
-\examples{
-\dontrun{
-heatmap_results <- plot_TROMscore_heatmap(
-  dm_trom_del_backgroud_clinic = similarity_results$dm_trom_del_backgroud_clinic,
-  trom_matrix = similarity_results$similarity_matrix,
-  tcga_sample_size = 424,
-  tcga_normal_count = 50,
-  model_group_count = 52,
-  condition = list("HBV pten p53 ko" = 5, "DEN Cl4" = 16),
-  clinical_vars = c("Hepatitis B", "Non-Alcoholic"),
-  cnv_genes = c("TP53", "PTEN"),
-  group_all = pca_data$group_all,
-  output_path = "./similarity/TROM_heatmap.pdf"
-)
-}
-
+Align scores and annotations by sample ID. If the human reference contains no
+normal samples, the empty normal-normal branch and normal mouse columns are
+omitted while tumor-tumor scores remain available.
 }
