@@ -72,7 +72,11 @@ if (stage == "install") {
   stopifnot(identical(hash, c(basename(tarball), digest::digest(file = tarball, algo = "sha256"))))
   Sys.setenv("_R_CHECK_CRAN_INCOMING_REMOTE_" = "false")
   setwd(results)
-  run_r(c("CMD", "check", "--as-cran", tarball), "check")
+  check_args <- c("CMD", "check", "--as-cran")
+  if (identical(tolower(Sys.getenv("CHECK_NO_MANUAL")), "true")) {
+    check_args <- c(check_args, "--no-manual")
+  }
+  run_r(c(check_args, tarball), "check")
   check_log <- readLines(file.path(results, paste0(package, ".Rcheck"), "00check.log"))
   stopifnot(!any(grepl(" (ERROR|WARNING)$", check_log)))
 } else if (stage == "environment") {

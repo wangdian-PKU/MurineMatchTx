@@ -1,7 +1,7 @@
 # Load the complete metabolism signature collection distributed with IOBR.
 .get_metabolism_signatures <- function() {
   if ("load_data" %in% getNamespaceExports("IOBR")) {
-    signatures <- IOBR::load_data("signature_metabolism")
+    signatures <- getExportedValue("IOBR", "load_data")("signature_metabolism")
   } else {
     data_env <- new.env(parent = emptyenv())
     utils::data("signature_metabolism", package = "IOBR", envir = data_env)

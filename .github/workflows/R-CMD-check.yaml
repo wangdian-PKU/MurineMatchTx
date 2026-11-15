@@ -39,6 +39,7 @@ jobs:
           )
       - uses: r-lib/actions/setup-pandoc@v2
       - uses: r-lib/actions/setup-tinytex@v2
+        if: runner.os == 'Linux'
       - name: Install Linux system dependencies
         if: runner.os == 'Linux'
         run: |
@@ -50,15 +51,7 @@ jobs:
           extra-packages: |
             any::pkgload
             any::digest
-            any::tinytex
             TROM@1.2
-      - name: Install Windows LaTeX manual font
-        if: runner.os == 'Windows'
-        shell: Rscript {0}
-        run: |
-          tinytex::tlmgr_install("courier")
-          font <- system2("kpsewhich", "pcrr8t.tfm", stdout = TRUE)
-          stopifnot(length(font) == 1L, nzchar(font))
       - name: Install package
         run: Rscript .github/scripts/ci.R install
       - name: Run testthat
@@ -68,6 +61,8 @@ jobs:
       - name: Build source package with vignettes
         run: Rscript .github/scripts/ci.R build
       - name: Check exact source package as CRAN
+        env:
+          CHECK_NO_MANUAL: ${{ runner.os == 'Windows' }}
         run: Rscript .github/scripts/ci.R check
       - name: Record environment
         if: always()
